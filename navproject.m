@@ -1,133 +1,85 @@
-% Set up serial communication
-% serialPort = 'COM3';  % Arduino serial port
-% baudRate = 9600;
-% s = serial(serialPort, 'BaudRate', baudRate);
-% fopen(s);  % Open serial connection
+%% point cloud
+% MATLAB script to simulate the creation of a point cloud
 
-% Parameters for the radar plot
-theta = [];  % Array to store angles
-r = [];  % Array to store distances
-maxDistance = 200;  % Maximum range of sensor
-fadeTime = 50;  % Number of steps before a point fades
+%Ultrasound sensor
+% Establish a connection to the Arduino
+a = arduino('COM5', 'Leonardo', 'Libraries', {'Ultrasonic', 'Servo'});
 
-% Initialize figure
+% Define pins for the ultrasonic sensor
+trigPin = 'A2';  % Trigger pin on Digital Pin 20
+echoPin = 'A3';  % Echo pin on Digital Pin 21
+ultrasonicObj = ultrasonic(a, trigPin, echoPin);
+servoX = servo(a, 'D9', 'MinPulseDuration', 1e-3, 'MaxPulseDuration', 2e-3);
+
+
+
+% Parameters for the simulation
+panMin = 0;       % Minimum pan angle (degrees)
+panMax = 180;     % Maximum pan angle (degrees)
+tiltMin = 0;      % Minimum tilt angle (degrees)
+tiltMax = 90;     % Maximum tilt angle (degrees)
+panStep = 9;      % Step size for pan angle (degrees)
+tiltStep = 9;     % Step size for tilt angle (degrees)
+maxDistance = 100;  % Maximum distance (cm)
+
+% Create arrays to store the point cloud data
+x = [];
+y = [];
+z = [];
+
+
+% Simulate the creation of the point cloud
 figure;
 hold on;
-axis equal;
-xlim([-maxDistance maxDistance]);
-ylim([-maxDistance maxDistance]);
-title('Radar Visualization');
+grid on;
 xlabel('X (cm)');
 ylabel('Y (cm)');
+zlabel('Z (cm)');
+title('Simulated 3D Point Cloud');
+axis equal;
+view(3);
 
-% Infinite loop to keep reading data from the Arduino
-while true
-    if s.BytesAvailable > 0
-        % Read data from the serial port
-        data = fscanf(s, '%s');
+% Loop through tilt angles (elevation)
+for tiltAngle = tiltMin:tiltStep:tiltMax
+    % Loop through pan angles (azimuth)
+    for panAngle = panMin:panStep:panMax
+        % Simulate the distance for this pan and tilt angle
+        % For simulation purposes, we'll generate random distances
+        % In reality, this would come from the ultrasonic sensor
+        %distance = maxDistance * (0.8 + 0.2 * rand(1));  % Random distance (80% to 100% of max distance)
+        writePosition(servoX, panAngle/180);
+        %fprintf('Current motor position is %f \n', panAngle/180);
+        pause(2);
+        distance = ultrasonicObj.readDistance();
         
-        % Split the data into angle and distance
-        values = strsplit(data, ',');
-        if length(values) == 2
-            angle = str2double(values{1});
-            distance = str2double(values{2});
-            
-            % Store the angle and distance in arrays
-            theta(end+1) = deg2rad(angle);  % Convert angle to radians
-            r(end+1) = distance;
-            
-            % Polar to Cartesian conversion
-            x = r .* cos(theta);
-            y = r .* sin(theta);
-            
-            % Plot the points (X, Y)
-            plot(x, y, 'go', 'MarkerSize', 4);  % Plot detected points as green circles
-            drawnow;  % Update the plot in real time
-            
-            % Fade older points
-            if length(theta) > fadeTime
-                theta = theta(2:end);  % Remove oldest angle
-                r = r(2:end);  % Remove oldest distance
-            end
-        end
+        % Convert angles from degrees to radians
+        panRad = deg2rad(panAngle);
+        tiltRad = deg2rad(tiltAngle);
+        
+        % Convert spherical coordinates to Cartesian coordinates
+        x_new = distance * cos(tiltRad) * cos(panRad);  % X-coordinate
+        y_new = distance * cos(tiltRad) * sin(panRad);  % Y-coordinate
+        z_new = distance * sin(tiltRad);                % Z-coordinate
+        
+        % Append the new point to the point cloud data
+        x = [x, x_new];
+        y = [y, y_new];
+        z = [z, z_new];
+        
+        % Plot the current point in the 3D space
+        scatter3(x_new, y_new, z_new, 'filled', 'MarkerFaceColor', 'r');
+        
+        % Update the plot
+        drawnow;
     end
 end
 
-% Close the serial connection when finished
-% fclose(s);
-% delete(s);
-% clear s;
-
-%%
-% Parameters for the radar plot
-% For testing
-theta = [];  
-r = [];  
-maxDistance = 300;  
-fadeTime = 50;  
-
-% Create polar axes
-pax = polaraxes;  
-title(pax, 'Map of the Environment');  
-
-% Set the radial limits (distance limits) and angle limits for the radar
-rlim([0 maxDistance]);  % Set the radial limit for the distance
-thetalim([0 180]);  % Limit the angle to 0-180 degrees (half-circle radar)
-
-% Simulate data without Arduino
-while true
-    % Simulate random angle and distance values
-    angle = randi([0, 180]);  % Random angle between 0 and 180 degrees
-    distance = randi([1, maxDistance]);  % Random distance between 1 cm and maxDistance
-
-    % Convert angle to radians and store angle and distance
-    theta(end+1) = deg2rad(angle);  % Convert angle to radians
-    r(end+1) = distance;
-    
-    % Plot the points on a traditional radar using polarplot
-    polarplot(pax, theta, r, 'b.');  % Polar plot with blue dots for points
-    drawnow;  % Update the plot in real time
-    
-    % Fade older points
-    if length(theta) > fadeTime
-        theta = theta(2:end);  % Remove oldest angle
-        r = r(2:end);  % Remove oldest distance
-    end
-    
-    pause(0.1);  % Small pause for a real-time effect (simulates radar scanning speed)
-end
-
-%%
-% A different radar layout
-% Set up serial communication
-delete(instrfind);  % Clear existing serial connections
-s = serial('COM3', 'BaudRate', 9600);  % Update COM3 to your Arduino port
-fopen(s);
-
-% Create polar axes
-figure;
-pax = polaraxes;
-
-while true
-    if s.BytesAvailable > 0
-        data = fscanf(s, '%s');
-        values = strsplit(data, ',');
-        if length(values) == 2
-            angle = str2double(values{1});
-            distance = str2double(values{2});
-            % Convert angle to radians for polar plot
-            theta = deg2rad(angle);
-            % Update the polar plot
-            polarplot(pax, theta, distance, 'b.');
-            rlim(pax, [0 300]);  % Set the maximum radial limit to 300 cm
-            thetalim(pax, [0 180]);  % Set the angle limit from 0 to 180 degrees
-            drawnow;
-        end
-    end
-end
-
-% Close the serial port when done
-fclose(s);
-delete(s);
-clear s;
-
+% Final plot of the entire point cloud
+scatter3(x, y, z, 'filled', 'MarkerFaceColor', 'r');
+xlabel('X (cm)');
+ylabel('Y (cm)');
+zlabel('Z (cm)');
+title('Final Simulated 3D Point Cloud');
+axis equal;
+grid on;
+view(3);
