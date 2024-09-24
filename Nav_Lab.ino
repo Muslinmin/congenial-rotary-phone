@@ -63,24 +63,34 @@ void readSensor(int xAxisDeg, int zAxisDeg){
   Serial.print(":");
   //e.g. 90,45,139: "90 degrees from left, 45 degrees from ground, 139cm away"
 }
-void loop() {
+
+void debug(){
+  Serial.print(12); 
+  Serial.print(","); 
+  Serial.print(10);
+  Serial.print(","); 
+  Serial.print(15);
+  Serial.write(58);
+}
+  void loop() {
     for (int pos = 15; pos <= 180; pos += 1) {
-    myServo.write(pos);
+    // myServo.write(pos);
     delay(15);  
       for(int zPos = 15; zPos <= 180; zPos+=1){
-        zServo.write(pos);  
+        // zServo.write(pos);  
         delay(15); 
-        readSensor(pos, zPos);
+        //readSensor(pos, zPos);
+        debug();
       }
-  }
+    }
     for (int pos = 180; pos >= 15; pos -= 1) {
-    myServo.write(pos);
-    delay(15);  
+    // myServo.write(pos);
+      delay(15);  
       for(int zPos = 180; zPos >= 15; zPos-=1){
-        zServo.write(pos);  
+        // zServo.write(pos);  
         delay(15); 
-        readSensor(pos, zPos);
+        // readSensor(pos, zPos);
+        debug();
       }
-  }
-
+    }
 }
