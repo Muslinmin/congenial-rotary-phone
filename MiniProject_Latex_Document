@@ -1,0 +1,429 @@
+\documentclass[a4paper,12pt]{report}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{float}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage[left=25mm,right=25mm,top=5mm,bottom=25mm,paper=a4paper]{geometry}
+
+\begin{document}
+
+% Title Page
+\title{Ultrasonic Sensor-Based Obstacle Detection and Avoidance for a Robot}
+
+\author{
+  Stafford Ho Sheng Xian \\
+  Yugendren S/O Sooriya Moorthi \\
+  Reuben Low Yu Xiang \\
+  Mohammed Muslimin Bin Mohd Saleh \\
+  Caleb Lee Jia Le
+  \\
+  \\{[RSE4501]}
+}
+
+\date{[29/09/24]}
+\maketitle
+\tableofcontents
+
+\chapter{Introduction} 
+
+\section{Project Objectives}
+
+\begin{itemize}
+    \item Demonstrate the feasibility of ultrasonic sensors for efficient obstacle detection in smoke-filled environments.
+    \item Analyze the mathematical and physical principles to optimize sensor calibration and performance.
+    \item Develop a system integrating ultrasonic sensors and a servomotor for automated 3D scanning on firefighter helmets, enabling real-time object detection in smoke-filled rooms.
+\end{itemize}
+
+\section{Background}
+
+\subsection{Abstract}
+Obstacle detection is critical for the safety and efficiency of autonomous systems. Effective navigation and collision avoidance prevent damage and ensure operational continuity. As robots evolve, robust detection systems for real-time adaptive behavior are essential in dynamic environments.
+
+\subsection{Relevance of Ultrasonic Sensors in Robotics}
+Ultrasonic sensors are widely used for their simplicity, affordability, and reliability across various conditions. By emitting ultrasound and measuring return time, they calculate distances to enable obstacle avoidance. Key advantages include:
+
+\begin{itemize}
+    \item \textbf{Cost-effective}: Ideal for low-budget applications compared to LiDAR or cameras.
+    \item \textbf{Accurate at short range}: Reliable detection in close proximity, critical for collision avoidance.
+    \item \textbf{All-weather performance}: Operates in diverse environments, unaffected by lighting.
+    \item \textbf{Non-contact sensing}: Detects without physical interaction, ideal for delicate obstacles.
+\end{itemize}
+
+\subsection{Importance of Obstacle Detection and Avoidance in Robotics}
+Autonomous obstacle detection and avoidance are vital for several reasons:
+\begin{itemize}
+    \item \textbf{Autonomy}: Enables independent navigation in diverse environments without human intervention.
+    \item \textbf{Safety}: Reduces the risk of collisions, particularly in shared human-robot spaces.
+    \item \textbf{Efficiency}: Improves task completion speed and reduces downtime from collisions.
+    \item \textbf{Scalability}: Supports integration into scalable systems like swarm robotics and self-driving cars.
+\end{itemize}
+
+\subsection{Conclusion}
+Integrating ultrasonic sensors into robotic systems is essential for developing autonomous, safe, and efficient robots. These sensors offer a reliable, cost-effective method for real-time obstacle detection, a key factor in the continued advancement of robotics.
+
+
+
+
+\chapter{Project Components}
+\section{Hardware Components}
+
+\subsection{Microcontroller}
+\begin{itemize}
+    \item \textbf{Arduino Leonardo Pro Micro (Quantity: 1)}: Compact, suited for embedded applications due to its small size. It was selected for this project because of its portability and the sufficient number of I/O pins for basic control and sensor connections.
+\end{itemize}
+
+\subsection{Sensors}
+The project uses the following sensors:
+\begin{itemize}
+    \item \textbf{Ultrasonic Sensor HC-SR04 (Quantity: 1)}: The HC-SR04 works by emitting ultrasonic sound waves and measuring the time it takes for the sound waves to reflect off an object and return to the sensor. By calculating the time difference, the distance to the object can be determined, making it a reliable sensor for obstacle detection.
+\end{itemize}
+
+\subsection{Actuators (Optional)}
+\begin{itemize}
+    \item \textbf{TowerPro SG90 Mini Micro Digital Servo 9g (Quantity: 1)}: Used to enable automated panning movements through integration with an Arduino, allowing for programmed motion control in the system.
+\end{itemize}
+
+\subsection{Additional Components (Optional)}
+Other components used in this project include:
+\begin{itemize}
+    \item \textbf{Breadboard Power Supply Module Output 3.3V and 5V (Quantity: 1)}: Regulates 9V battery input to provide stable 5V outputs, powering the ultrasonic sensor and other components during prototyping.
+    \item \textbf{USB 2 programming cable (Type-C) (Quantity: 1)}: Used for communication between the microcontroller and a computer.
+    \item \textbf{USB 2 programming cable, modified with plastic connector (Quantity: 1)}: An additional USB cable modified for specific usage in the project.
+    \item \textbf{Breadboard with 420 tie-points (Quantity: 1)}: Used for prototyping and connecting various sensors and components without soldering.
+    \item \textbf{Jumper Wires (Male-Male, Dupont) (Quantity: 10)}: These are used to connect components on the breadboard.
+    \item \textbf{Jumper Wires (Female-Female, Dupont) (Quantity: 10)}: Similar to male-male jumper wires, these provide flexibility in connecting different components.
+\end{itemize}
+
+
+\section{Software Components}
+
+\subsection{Programming Language}
+The project is developed using the \textbf{Arduino IDE}, which is a popular platform for writing and uploading code to Arduino boards. The Arduino programming environment is based on \textbf{C/C++} and provides built-in functions and libraries that simplify working with hardware components like sensors and actuators.
+
+\subsection{Libraries Used}
+In this project, the following libraries were utilized:
+\begin{itemize}
+    \item \textbf{stdio.h}: A standard C library used for input and output operations in the Arduino code.`stdio.h` is used in this project for basic I/O operations like reading and writing data.
+\end{itemize}
+
+\chapter{System Design and Architecture}
+\section{System Block Diagram}
+% Provide a block diagram illustrating the flow of information and components in the system; for example: sensor, actuator, microcontroller, and HMI (Human-Machine Interface).
+
+This block diagram illustrates the flow of information and the interaction between components in a system designed to detect obstacles for a firefighter using an ultrasonic sensor mounted on a helmet. The block diagram consists of several key components, including an Arduino Leonardo microcontroller, an ultrasonic sensor, a servo motor, an LED and MATLAB.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\linewidth]{helmet block diagram.png}
+    \caption{Block diagram of the obstacle detection helmet.}
+    \label{fig:block diagram}
+\end{figure}
+
+
+\begin{itemize}
+    \item \textbf{Power Supply}: The system is powered by a 5V power supply that provides the necessary voltage to the Arduino Leonardo and its connected peripherals.
+    
+    \item \textbf{Ultrasonic Sensor}: The ultrasonic sensor, mounted on a servo motor, sends distance measurements to the Arduino Leonardo. The sensor continuously relays these distance measurements to the microcontroller for processing.
+
+    \item \textbf{Arduino Leonardo}: The Arduino Leonardo interprets the distance data from the ultrasonic sensor and controls the servo motor’s position. Based on the distance data, it decides whether to activate the red LED warning light if an obstacle is detected within a threshold distance. It also communicates with the MATLAB software for real-time data visualization.
+
+    \item \textbf{Servo Motor}: The servo motor is controlled by the Arduino to pan the ultrasonic sensor across a wider field of view for obstacle detection.
+
+    \item \textbf{Red LED Warning Light}: If the Arduino determines that an obstacle is within a predefined distance, it switches on the red LED warning light to notify the user. If the path is clear, the LED remains off.
+
+    \item \textbf{MATLAB Software}: The MATLAB software receives distance and angle data from the Arduino Leonardo, processes it, and generates real-time visualizations. The software aids in visualizing the scanned environment, providing the user with immediate feedback on the surrounding obstacles.
+
+\end{itemize}
+
+\section{Circuit Diagram}
+Include a schematic of the circuit showing the connections between the sensor, actuators, HMI, and microcontroller.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\linewidth]{helmet circuit diagram.png}
+    \caption{Helmet circuit diagram.}
+    \label{fig:enter-label}
+\end{figure}
+
+\section{System Control Logic (if applicable)}
+Explain the logic behind the robot's behavior in terms of project objectives.
+
+\chapter{Implementation}
+\section{Sensor}
+Explain how the sensor was integrated into the system. Include the method/principle used to measure the physical quantities, e.g., how distance measurement is done in the ultrasonic sensor.
+
+Include the formula for physical quantities (distance) calculation:
+\[
+d = \Delta t \times \frac{V_s}{2}
+\]
+
+\section{Actuators}
+Describe how the actuators are controlled for the desired motion.
+
+\section{Application Algorithms}
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.8\textwidth]{Ultrasonic Servomotor-Algo & Logic.png} % Adjust width as necessary
+    \caption{Flowchart of the Pan Angle Routine}
+    \label{fig:flowchart}
+\end{figure}
+Explain the application algorithm used in detail, including any flowcharts if necessary. Discuss how parameters are determined for the intended purpose of the algorithms. For example, to compute distance with an ultrasonic sensor, the speed of sound is a parameter used.
+
+The algorithm implemented in this project enables the ultrasonic sensor to perform automated panning movements using a servomotor, allowing the sensor to scan the surrounding environment and detect obstacles within a specified threshold distance.
+
+\subsection{Algorithm Overview}
+\begin{enumerate}
+    \item \textbf{Initialization:}
+    The system starts by initializing essential components, including the ultrasonic sensor, servomotor, and a data plot table for storing sensor readings. An obstacle detection threshold is set at \textbf{60 cm}, meaning any object within this range is considered an obstacle that the system must detect.
+
+    \item \textbf{Continuous Scanning Loop:}
+    The system enters an infinite loop (\textbf{While 1}) to continuously scan the environment. The servomotor's angle (\textit{pan\_angle}) is initialized and constrained between \textbf{0° and 180°} for a wide panning range. If the angle is less than or equal to \textbf{180°}, the ultrasonic sensor gathers distance data as the servo pans across the range.
+
+    \item \textbf{Subroutine for Pan Angle:}
+    The system invokes the \textbf{PanAngleSubRoutine} at each increment of the pan angle, where the ultrasonic sensor checks for obstacles within the \textbf{60 cm} threshold. If an obstacle is detected, its position is flagged or stored. After each scan, the \textit{pan\_angle} is incremented by \textbf{1°} until it reaches \textbf{180°}. Once the full scan is completed, the algorithm resets the \textit{pan\_angle} and repeats the process to ensure continuous obstacle detection.
+
+    \item \textbf{Subroutine Explanation:}
+    The \textbf{PanAngleSubRoutine} processes the ultrasonic sensor's data at each angle step, evaluating and storing the distance to detected objects. If an obstacle is detected within the threshold, this data can be logged or used for immediate system actions, such as alerts.
+\end{enumerate}
+
+\subsection{Parameter Determination}
+
+\begin{itemize}
+    \item \textbf{Speed of Sound:} A critical parameter in this algorithm is the \textbf{speed of sound}, used by the ultrasonic sensor to calculate distances. The distance to an object is computed using the formula:
+    \[
+    d = \frac{\Delta t \times V_s}{2}
+    \]
+    Where:
+    \begin{itemize}
+        \item \( d \) is the distance to the obstacle.
+        \item \( \Delta t \) is the time taken for the sound waves to travel to the object and back.
+        \item \( V_s \) is the speed of sound in air (typically 343 m/s at room temperature).
+    \end{itemize}
+
+    \item \textbf{Obstacle Threshold:} The obstacle detection threshold is predefined at \textbf{60 cm}, flagging any object within this distance for action.
+
+    \item \textbf{Panning Range:} The panning range is set between \textbf{0° and 180°}, ensuring wide coverage by the ultrasonic sensor as it scans the surroundings.
+\end{itemize}
+
+\chapter{Code}
+\section{Main Code}
+
+% Define custom settings for lstlisting
+\lstset{
+    language=C++,                         % Set the language to C++
+    backgroundcolor=\color{lightgray},    % Set background color
+    frame=single,                         % Add a frame around the code
+    basicstyle=\ttfamily,                 % Use a typewriter font
+    keywordstyle=\color{blue},            % Color keywords
+    commentstyle=\color[RGB]{0,128,0},    % Dark green color for comments
+    caption=Arduino C++ Code,             % Caption for the code
+    emph={setup, loop},                   % Specify function names to be bold
+    emphstyle=\bfseries,                  % Style for emphasized text (function names)
+    breaklines=true,                      % Enable line breaking
+    breakatwhitespace=true,               % Allow breaking at whitespace
+}
+
+\begin{lstlisting}
+#include <Servo.h>
+
+// Define pins for the ultrasonic sensor and servo
+const int trigPin = A2;   // Trigger pin for ultrasonic
+const int echoPin = A3;   // Echo pin for ultrasonic
+const int warningLedPin = 7; // Warning LED on pin D7
+const int servoPin = 6;   // Servo pin on D6
+
+float t=0, d=0, scale=1e-4; //add scaling calculation here
+
+// Servo object
+Servo servoX;
+
+// Obstacle detection threshold (in cm)
+const int obstacleThreshold = 60;
+
+void setup() {
+  // Initialize serial communication for debugging
+  Serial.begin(9600);
+
+  // Initialize the servo motor
+  servoX.attach(servoPin);
+
+  // Initialize the warning LED pin
+  pinMode(warningLedPin, OUTPUT);
+  pinMode(trigPin,OUTPUT);
+  pinMode(echoPin,INPUT);
+}
+
+float readSensor(){
+    // put your main code here, to run repeatedly:
+  //Generate trig pulse to start
+  digitalWrite(trigPin,LOW);
+  delayMicroseconds(2);
+  digitalWrite(trigPin,HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trigPin,LOW);
+  //measure TOF and compute distance
+  t = pulseIn(echoPin, HIGH);
+  d = scale* t * 343 / 2;
+  // Use serial print to display result on serial monitor
+  Serial.print("Distance: ");
+  Serial.print(d);
+  Serial.println("cm");
+  delay (30);
+  return d;
+}
+
+void loop() {
+  // Sweep the servo from 30 to 150 degrees
+  for (int angle = 50; angle <= 70; angle+=6) {
+    // Move the servo to the current angle
+    servoX.write(angle);
+    delayMicroseconds(200);  // Allow time for the servo to move
+
+    // Measure the distance using the ultrasonic sensor
+    float dist1 = readSensor();
+    delayMicroseconds(10);   // Small delay between measurements
+    float dist2 = readSensor();
+    float dist = (dist1 + dist2) / 2; // Average the two distance readings
+
+    // Debugging: Print the distance and angle to the serial monitor
+
+
+    // Check if the obstacle is within the threshold distance
+    if (dist < obstacleThreshold && dist > 0) { // Ensure distance is valid
+      Serial.print("Warning: Obstacle detected at ");
+      Serial.print(dist);
+      Serial.print(" cm at angle ");
+      Serial.print(angle);
+      Serial.println(" degrees");
+      digitalWrite(warningLedPin, HIGH);  // Turn on the warning LED
+    } else {
+      digitalWrite(warningLedPin, LOW);  // Turn off the warning LED
+    }
+  }
+
+  // Sweep the servo back from 150 to 30 degrees
+  for (int angle = 70; angle >= 50; angle-=6) {
+    // Move the servo to the current angle
+    servoX.write(angle);
+    delayMicroseconds(200);  // Allow time for the servo to move
+
+    // Measure the distance using the ultrasonic sensor
+    float dist1 = readSensor();
+    delayMicroseconds(10);  // Small delay between measurements
+    float dist2 = readSensor();
+    float dist = (dist1 + dist2) / 2; // Average the two distance readings
+
+
+    // Check if the obstacle is within the threshold distance
+    if (dist < obstacleThreshold && dist > 0) { // Ensure distance is valid
+      Serial.print("Warning: Obstacle detected at ");
+      Serial.print(dist);
+      Serial.print(" cm at angle ");
+      Serial.print(angle);
+      Serial.println(" degrees");
+      digitalWrite(warningLedPin, HIGH);  // Turn on the warning LED
+    } else {
+      digitalWrite(warningLedPin, LOW);  // Turn off the warning LED
+    }
+  }
+}
+\end{lstlisting}
+
+
+
+
+
+
+
+
+\section{Explanation of Key Sections}
+Break down and explain important parts of the code, such as:
+\begin{itemize}
+    \item \textbf{Distance measurement using the ultrasonic sensor:} The ultrasonic sensor works by emitting sound waves and measuring the time it takes for them to bounce back after hitting an obstacle. The formula to calculate the distance is:
+    \[
+    \text{Distance} = \frac{\Delta t \times V_s}{2}
+    \]
+    where \(\Delta t\) is the time taken for the signal to return, and \(V_s\) is the speed of sound in air.
+
+    \item \textbf{Actuator control for forward, backward, and turning:} This section of the code handles the control of motors, making the robot move forward, backward, or turn depending on sensor input.
+
+    \item \textbf{Application logic:} The main logic determines how the robot reacts to obstacles. For instance, if an obstacle is detected within a certain distance, the robot could stop, turn, or move in another direction.
+\end{itemize}
+
+\chapter{Testing and Results}
+
+\section{Overview}
+This section aims to characterize the ultrasonic sensor by examining its performance under various conditions, including its deadband in close proximity, maximum measurable distance, and accuracy influenced by environmental temperature and humidity. To ensure measurement accuracy, the actual speed of sound, affected by these environmental factors, is determined and used for calibration. \\\\The test cases are summarized in the follow keypoints:
+
+
+\begin{itemize}
+    \item Comparison between expected distances and measured distance (accuracy)
+    \item Testing the minimum detectable distance (close proximity)
+    \item Testing the maximum detectable distance (range limit)
+\end{itemize}
+    
+\section{Testing Setup}
+Describe the environment used for testing:
+\begin{itemize}
+    \item \textbf{Location:} Living room, flat surface, 9 metres length and 5 metres wide of space for testing. 
+
+    \item \textbf{Challenges:} 
+    \begin{itemize}
+        \item \textbf{Sensor calibration:} Initial distance measurements showed slight discrepancies, primarily due to variations in environmental temperature and humidity. These factors affected the speed of sound, requiring adjustments on the speed of sound in code to achieve accurate readings.
+    \end{itemize}
+\end{itemize}
+
+
+\section{Results}
+Summarize the results of the testing process. Include photos or videos of the robot in action (if available). Discuss how effectively the robot met the project objectives.
+
+\chapter{Conclusion}
+\section{Project Summary}
+
+In conclusion, this project successfully demonstrated the feasibility of ultrasonic sensors for obstacle detection in smoke-filled environments. Key accomplishments include obtaining reliable distance measurements across different environmental conditions, with readings consistently within acceptable tolerances. The system also provided real-time visual feedback through an LED indicator when the detection threshold was crossed. Additionally, servomotor integration enabled automated panning movements, expanding the sensor's field of view. These results underscore the potential of ultrasonic sensors in low-visibility conditions and establish a solid foundation for further enhancements and optimizations.
+
+
+
+
+\section{Challenges}
+
+During the project, several challenges were encountered:
+
+\begin{itemize}
+    \item \textbf{Speed of Sound Variations}: The speed of sound changes in different environments, affecting the accuracy of distance measurements. 
+    
+    \textbf{\textit{Solution:}} To maintain measurement accuracy, the sensor required recalibration at each testing location due to environmental factors influencing the speed of sound. This process involved adjusting the system parameters to account for variations in air pressure, temperature, and humidity, ensuring consistent and reliable performance across different test environments.
+    
+    \item \textbf{Noise Filtering}: Unwanted noise interference was present during testing, which affected the sensor's precision in detecting obstacles. This necessitated the implementation of filtering techniques to improve accuracy.
+    
+    \item \textbf{Field of View (FOV) and Accuracy Tradeoff}: Balancing the sensor’s FOV with detection accuracy proved challenging. A wider FOV resulted in inconsistent readings, causing the system to occasionally miss obstacles, as demonstrated by erratic blinking in the detection system.
+    
+    \textbf{\textit{Solution:}} FOV was narrowed to focus on a more confined detection area, improving precision
+    
+\end{itemize}
+
+
+\section{Future Improvements}
+Suggest improvements that could be made to the robot in future versions, such as:
+\begin{itemize}
+    \item **Sensor Fusion**: Exploring the integration of multiple sensors, such as infrared or LiDAR, would enhance the system’s versatility, allowing the system to perform better in a wider range of environmental conditions such as dimly lit spaces. It would also allow for detailed 3D mapping in different environments.
+
+    \item **Advanced Filtering Algorithms**: Implementing advanced filtering techniques, such as Kalman filters, would further refine sensor data, reducing noise and improving accuracy, especially in dynamic environments.
+
+    \item **Porting 3D Rotational Capabilities to Rescue Robots**: Leveraging the system's 3D rotational capabilities by integrating it into rescue robots could provide enhanced environmental scanning, allowing robots to effectively detect and navigate obstacles in hazardous and smoke-filled environments.
+\end{itemize}
+
+\chapter{References}
+Include any references to materials, tutorials, or papers you referred to for completing the project.
+
+\appendix
+\chapter{Appendix (Optional)}
+\section{Presentation Slides}
+Add any additional diagrams or illustrations that may help explain the system.
+
+\section{Additional Code}
+Include any supplementary code, if applicable (e.g., code for a servo motor or buzzer).
+
+\end{document}
