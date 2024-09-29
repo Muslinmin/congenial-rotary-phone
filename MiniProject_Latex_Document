@@ -37,7 +37,7 @@
 \vspace{0cm}
 {\let\clearpage\relax \chapter{Introduction}}
 % \chapter{Introduction}
-
+\vspace{-1.5em}
 \section{Project Objectives}
 
 \begin{itemize}
@@ -51,7 +51,7 @@
 
 
 \section{Background}
-Ultrasonic sensors offer an advantage over LiDAR and cameras, especially in dusty or smoke-filled conditions. Unlike cameras, which rely on visibility and light, and LiDAR, which can be scattered by particles in the air, ultrasonic sensors use sound waves. This allows them to detect obstacles in environments where visual and optical methods fail.\\\\This makes ultrasonic sensors a valuable tool for applications such as firefighting, where LIDAR and cameras may not be practical.\\\\""Obstacle Helmet project description here""
+    Ultrasonic sensors offer an advantage over LiDAR and cameras, especially in dusty or smoke-filled conditions. Unlike cameras, which rely on visibility and light, and LiDAR, which can be scattered by particles in the air during mapping(refer to Appendix A), ultrasonic sensors use sound waves. This allows them to detect obstacles in environments where visual and optical methods fail.\\This makes ultrasonic sensors a valuable tool for applications such as firefighting, where LIDAR and cameras may not be practical.\\\\""Obstacle Helmet project description here""
 
 
 \chapter{Project Components}
@@ -217,7 +217,9 @@ The following colour coding scheme has been adopted in the wiring to ensure clar
 
 \chapter{Implementation}
 \section{Overview}
-The implementation consists of two main parts. The first part involves testing the sensor's accuracy and making changes to the speed of sound in the code, including proximity and maximum range tests.\\\\The second part integrates the sensor with a servo, developing a warning system and visualizing the user's field of vision using a MATLAB graph.
+The implementation is divided into two key components. The first component focuses on testing the sensor's accuracy and adjusting the speed of sound in the code, including conducting proximity and maximum range tests.
+
+The second component involves integrating the sensor with a servo, developing a warning system, and visualizing the user's field of vision through a MATLAB graph.
 \section{Sensor Characterization}
 
 To understand the accuracy and performance of the ultrasonic sensor, we first determine the equation used for calculating distance. The fundamental equation for calculating the distance from the sensor is:
@@ -245,7 +247,7 @@ In this case:
   \item The slope \(m = \frac{v}{2}\) represents half the speed of sound.
 \end{itemize}
 
-Thus, plotting distance against time results in a straight line, with the gradient being proportional to the speed of sound. Any discrepancy in the assumed speed of sound will be reflected in the slope of the line. If we assume a speed of sound that is incorrect for the testing conditions (e.g., atmospheric pressure, temperature), we will observe an error in the gradient of the line, causing inaccurate distance measurements.
+Thus, plotting distance against time results in a straight line, with the gradient being proportional to the speed of sound. Any discrepancy in the assumed speed of sound will be reflected in the slope of the line. Suppose we assume a speed of sound that is incorrect for the testing conditions (e.g., atmospheric pressure, temperature). In that case, we will observe an error in the gradient of the line, causing inaccurate distance measurements.
 
 \subsection{Effect of Incorrect Speed of Sound Assumption}
 
@@ -255,7 +257,7 @@ For instance, comparing two cases:
   \item Using an incorrect speed of sound, $v = 330 \, \text{m/s}$ (for colder conditions).
 \end{itemize}
 
-As shown in Figure~\ref{fig:sound_graph}, the difference between the two lines increases as the actual distance increases. The difference in calculated distances is proportional to the actual distance, leading to larger distortions for larger distances.
+As shown in Figure~\ref{fig:sound_graph}, the gap between the two lines widens as the actual distance grows. The error in the calculated distances is proportional to the actual distance, resulting in greater distortions at larger distances.
 
 \begin{figure}
     \centering
@@ -266,7 +268,7 @@ As shown in Figure~\ref{fig:sound_graph}, the difference between the two lines i
 
 \subsection{Test Data Analysis}
 
-To further validate this, we conducted tests with distances ranging from 10 cm to 300 cm. The results showed increasing distortion from the expected values as the distance increased, particularly due to the incorrect assumption of the speed of sound.
+To validate this further, we performed tests with distances between 10 cm and 300 cm. The results indicated that as the distance increased, the distortion from the expected values became more pronounced, mainly due to an incorrect assumption about the speed of sound.
 
 \begin{table}[h!]
 \centering
@@ -286,7 +288,7 @@ To further validate this, we conducted tests with distances ranging from 10 cm t
 
 The difference between the expected and measured distances grows larger as the distance increases. Minor anomalies in the data are expected due to sensor noise and environmental factors, but the overall trend shows increased distortion at longer distances.
 
-\subsection{Determining the Correct Speed of Sound}
+\subsection{Determining the Speed of Sound}
 
 To achieve higher accuracy in distance measurement, a key step is to determine the actual speed of sound under the specific conditions. By rearranging the equation, we can make the speed of sound the subject:
 \[
@@ -376,7 +378,7 @@ This graph demonstrates that with a more accurate speed of sound, the measured v
 
 \subsection{Conclusion}
 
-By determining and using the correct speed of sound, we improve the accuracy of our ultrasonic sensor system, especially for long distances. The MATLAB script allows us to characterize the sensor in the environment, leading to more precise applications in real-world scenarios.
+By determining and using the calculated speed of sound, we enhance the accuracy of our ultrasonic sensor system, particularly over long distances. The MATLAB script enables us to characterize the sensor within the specific environment, resulting in more accurate performance for real-world applications.
 
 
 
@@ -394,18 +396,18 @@ By determining and using the correct speed of sound, we improve the accuracy of 
 \tikzstyle{decision} = [diamond, minimum width=3cm, minimum height=1cm, text centered, draw=black]
 \tikzstyle{arrow} = [thick,->,>=stealth]
 
-\begin{tikzpicture}[node distance=2.5cm, auto, scale=0.7, transform shape]
+\begin{tikzpicture}[node distance=3.5cm, auto, scale=0.7, transform shape]
 
     % Nodes
     \node (start) [startstop] {Start};
     \node (init) [process, below of=start] {Initialize Plot table, Sensors and Servo objects};
     \node (setthreshold) [process, below of=init] {Set obstacle\_threshold = 60cm};
     \node (while) [decision, below of=setthreshold] {While 1};
-    \node (checkangle) [decision, below of=while, yshift=-1.5cm] {Is pan\_angle <= 180};
+    \node (checkangle) [decision, below of=while, yshift=-1.5cm] {Is pan\_angle $<$= 180};
     \node (panangle) [process, right of=checkangle, xshift=3cm] {pan\_angle = pan\_angle + 1};
     \node (subroutine) [process, below of=checkangle, yshift=-1.5cm] {PanAngleSubRoutine};
     \node (end) [startstop, below of=subroutine, yshift=-1cm] {End};
-    \node (isanglepos) [decision, right of=panangle, xshift=3cm] {Is pan\_angle >= 0};
+    \node (isanglepos) [decision, right of=panangle, xshift=3cm] {Is pan\_angle $>$= 0};
     \node (subroutine2) [process, below of=isanglepos, yshift=-1cm] {PanAngleSubRoutine};
     \node (incangle) [process, below of=subroutine2, yshift=-1cm] {pan\_angle = pan\_angle + 1};
 
@@ -420,9 +422,7 @@ By determining and using the correct speed of sound, we improve the accuracy of 
     \draw [arrow] (panangle.east) -- (isanglepos.west);
     \draw [arrow] (isanglepos.south) -- node[anchor=west] {True} (subroutine2.north);
     \draw [arrow] (subroutine2.south) -- (incangle.north);
-    % \draw [arrow] (incangle.south) -- (end.south);
-    % \draw [arrow] (incangle.south) -- ++(0,-1) -- ++(0,-1) -- (end.south);
-    \draw [arrow] (incangle.south) -- ++(0,-0.2) -- ++(-3,0) -- (end.east);
+    \draw [arrow] (incangle.south) -- ++(0,-0.1) -- ++(-3,0) -- (end.east);
 
 
     % Arrow for False in "Is pan_angle <= 180"
@@ -430,7 +430,31 @@ By determining and using the correct speed of sound, we improve the accuracy of 
     \draw [arrow] (isanglepos.north) -- ++(0,0) -- ++(0,2) -- (while.east) node[anchor=south] {False};
 \end{tikzpicture}
 
-
+\begin{tikzpicture}[node distance=2cm]
+\node {Start};
+\node (init) [process, below of=start] {Initialize Plot table, Sensors and Servo objects};
+\node (setthreshold) [process, below of=init, xshift=2cm] {Is pan_angle \$>$= 0};
+% \node (7980d08d-0ce1-407a-80b4-676b4445469e) [7ff96343-bf0c-5a3f-a35c-f0ea1bb7638b, below of=6b2250fe-453a-41f4-a56b-e44b0975896e] {Set obstacle threshold = 60cm};
+% \node (a62e3ee2-ebd7-4370-96cc-e3c88a4ed946) [27437e67-9b34-5aec-9a46-e8b95f63a13b, right of=7980d08d-0ce1-407a-80b4-676b4445469e, xshift=2cm] {PanAngleSubRoutine};
+% \node (b290f74f-4283-404d-a761-845259b4e4e0) [b0e005f8-e267-5a3a-a638-881fb9faed1d, below of=7980d08d-0ce1-407a-80b4-676b4445469e, yshift=-0.5cm] {While 1};
+% \node (abc73629-545a-47dd-b747-678b99a956f4) [574b93ce-5d31-5729-9ed0-9a79e73d4725, right of=b290f74f-4283-404d-a761-845259b4e4e0, xshift=2cm] {pan_angle += 1};
+% \node (b38b0459-b4d4-47a9-af32-32b7190ce383) [612da6d3-b8da-51bb-9c1f-0240c7a7df03, below of=b290f74f-4283-404d-a761-845259b4e4e0, yshift=-0.5cm] {Is pan angle <= 180};
+% \node (84369e61-095a-43a2-96e8-38f6831d25e3) [69bbb168-da59-5865-902f-94e77902bf95, right of=b38b0459-b4d4-47a9-af32-32b7190ce383, xshift=2cm] {End};
+% \node (8a7a8753-0bfc-4d1d-8f7f-946086dda5a6) [574b93ce-5d31-5729-9ed0-9a79e73d4725, left of=b38b0459-b4d4-47a9-af32-32b7190ce383, xshift=-2cm] {pan_angle += 1};
+% \node (f4f8bbaf-b28a-4347-b011-de8e1a0929a2) [27437e67-9b34-5aec-9a46-e8b95f63a13b, below of=b38b0459-b4d4-47a9-af32-32b7190ce383, yshift=-0.5cm] {PanAngleSubRoutine};
+% \draw [7be24b85-97d0-5b76-ba9e-d94005dca8f2] (ff54e9e3-eb59-4bf0-9259-01af05d0aee7) --  (6b2250fe-453a-41f4-a56b-e44b0975896e);
+% \draw [7be24b85-97d0-5b76-ba9e-d94005dca8f2] (6b2250fe-453a-41f4-a56b-e44b0975896e) --  (7980d08d-0ce1-407a-80b4-676b4445469e);
+% \draw [7be24b85-97d0-5b76-ba9e-d94005dca8f2] (7980d08d-0ce1-407a-80b4-676b4445469e) --  (b290f74f-4283-404d-a761-845259b4e4e0);
+% \draw [7be24b85-97d0-5b76-ba9e-d94005dca8f2] (b38b0459-b4d4-47a9-af32-32b7190ce383) -- node[anchor=east] {True} (f4f8bbaf-b28a-4347-b011-de8e1a0929a2);
+% \draw [7be24b85-97d0-5b76-ba9e-d94005dca8f2] (ab369489-74f9-4ffc-80c9-87d2a3e820bd) --  (a62e3ee2-ebd7-4370-96cc-e3c88a4ed946);
+% \draw [7be24b85-97d0-5b76-ba9e-d94005dca8f2] (a62e3ee2-ebd7-4370-96cc-e3c88a4ed946) --  (abc73629-545a-47dd-b747-678b99a956f4);
+% \draw [7be24b85-97d0-5b76-ba9e-d94005dca8f2] (f4f8bbaf-b28a-4347-b011-de8e1a0929a2) -|  (8a7a8753-0bfc-4d1d-8f7f-946086dda5a6);
+% \draw [7be24b85-97d0-5b76-ba9e-d94005dca8f2] (8a7a8753-0bfc-4d1d-8f7f-946086dda5a6) --  (b38b0459-b4d4-47a9-af32-32b7190ce383);
+% \draw [7be24b85-97d0-5b76-ba9e-d94005dca8f2] (b290f74f-4283-404d-a761-845259b4e4e0) --  (b38b0459-b4d4-47a9-af32-32b7190ce383);
+% \draw [7be24b85-97d0-5b76-ba9e-d94005dca8f2] (b38b0459-b4d4-47a9-af32-32b7190ce383) -- node[anchor=east] {False} (ab369489-74f9-4ffc-80c9-87d2a3e820bd);
+% \draw [7be24b85-97d0-5b76-ba9e-d94005dca8f2] (ab369489-74f9-4ffc-80c9-87d2a3e820bd) |- node[anchor=south] {False} (b290f74f-4283-404d-a761-845259b4e4e0);
+% \draw [7be24b85-97d0-5b76-ba9e-d94005dca8f2] (abc73629-545a-47dd-b747-678b99a956f4) --  (84369e61-095a-43a2-96e8-38f6831d25e3);
+\end{tikzpicture}
 
 
 The algorithm implemented in this project enables the ultrasonic sensor to perform automated panning movements using a servomotor, allowing the sensor to scan the surrounding environment and detect obstacles within a specified threshold distance.
@@ -463,7 +487,9 @@ The algorithm implemented in this project enables the ultrasonic sensor to perfo
     \item \textbf{Panning Range:} The panning range is set between \textbf{50° and 70°}.
 \end{itemize}
 
-\chapter{Code}
+
+{\let\clearpage\relax \chapter{Code}}
+
 \section{Main Code}
 
 % Define custom settings for lstlisting
@@ -700,41 +726,8 @@ void checkObstacleThreshold(float dist) {
 \textbf{Explanation:}  
 This function compares the measured distance \texttt{dist} to the predefined threshold value \texttt{obstacleThreshold} (60 cm). If the object is detected within this range and the distance is valid (greater than 0), the warning LED connected to \texttt{warningLedPin} is turned on. If the object is farther away or no valid reading is detected, the LED remains off.
 
-\subsection{Setup Function}
+{\let\clearpage\relax \chapter{Testing and Results}}
 
-The setup function initializes the servo motor, LED, and ultrasonic sensor for the obstacle detection system.
-
-\begin{lstlisting}
-// Setup function to initialize components
-void setup() {
-    Serial.begin(9600);                   // Initialize serial communication
-    servoX.attach(servoPin);              // Attach servo to the designated pin
-    pinMode(warningLedPin, OUTPUT);       // Set LED pin as output
-    pinMode(trigPin, OUTPUT);             // Set ultrasonic trigger pin as output
-    pinMode(echoPin, INPUT);              // Set ultrasonic echo pin as input
-}
-\end{lstlisting}
-
-\textbf{Explanation:}  
-This function sets up the necessary components:
-- The servo motor is attached to its designated pin using \texttt{servoX.attach()}.
-- The warning LED pin is set to output mode.
-- The trigger pin for the ultrasonic sensor is set as an output, and the echo pin is set as an input.
-- Serial communication is initialized to print data to the serial monitor.
-
-\subsection{Speed of Sound Calculation}
-
-In the distance calculation, the speed of sound in air is used to convert the time of flight into a measurable distance.
-
-\begin{lstlisting}
-d = scale * t * 343 / 2;  // Distance = TOF * speed of sound / 2
-\end{lstlisting}
-
-\textbf{Explanation:}  
-This formula calculates the distance using the time of flight (\texttt{t}) and the speed of sound in air (\(343 \, \text{m/s}\)). The factor of 2 accounts for the round trip of the sound wave (to the object and back). The scaling factor \texttt{scale} ensures that the time is appropriately converted from microseconds to a distance in centimeters.
-
-
-\chapter{Testing and Results}
 
 \section{Overview}
 This section aims to characterize the ultrasonic sensor by examining its performance under various conditions, including its deadband in close proximity, maximum measurable distance, and accuracy influenced by environmental temperature and humidity. To ensure measurement accuracy, the actual speed of sound, affected by these environmental factors, is determined and used for calibration.\\\\Additionally, a test case regarding firefighting application with an ultrasonic sensor is done to evaluate the performance of the sensor in thick smoke conditions.\\\\The test cases are summarized in the follow keypoints:
@@ -770,7 +763,7 @@ Describe the environment used for testing:
 A scatter plot with a trend line was used to determine the speed of sound under the test room conditions, yielding \textbf{a value of 326 m/s at 30°C.}
 \begin{figure}[H]
     \centering
-    \includegraphics[width=1\linewidth]{Trendgraph_ultrasonicreadings.png}
+    \includegraphics[width=0.5\linewidth]{Trendgraph_ultrasonicreadings.png}
     \caption{Ultrasonic Sensor Accuracy Trend}
     \label{fig:trend-graph}
 \end{figure}
@@ -843,14 +836,14 @@ The sensor's detection threshold was set at \textbf{60 cm} to provide adequate w
     \label{fig:led-smoke-comparison}
 \end{figure}
 \subsubsection{Smoke Condition Test}
-In a smoke-filled box simulating firefighting conditions, the \textbf{sensor successfully detected obstacles}, demonstrating its potential for accurate detection in low-visibility environments. When obstacles were detected within the 60 cm threshold, the red warning LED was activated.\\\\These tests characterize the ultrasonic sensor's capabilities, guiding its effective application for obstacle detection in conditions where LIDAR and camera is less effective.
+In a smoke-filled box simulating firefighting conditions, the \textbf{sensor successfully detected obstacles}, demonstrating its potential for accurate detection in low-visibility environments. When obstacles were detected within the 60 cm threshold, the red warning LED was activated.These tests characterize the ultrasonic sensor's capabilities, guiding its effective application for obstacle detection in conditions where LIDAR and camera is less effective.
 
 
 
 
 
+{\let\clearpage\relax \chapter{Conclusion}}
 
-\chapter{Conclusion}
 \vspace{-1.5em} % Adjust this value to control the spacing
 \section{Project Summary}
 
