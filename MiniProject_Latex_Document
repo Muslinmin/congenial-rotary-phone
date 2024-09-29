@@ -7,7 +7,8 @@
 \usepackage[left=25mm,right=25mm,top=5mm,bottom=25mm,paper=a4paper]{geometry}
 \usepackage{hyperref}
 \usepackage{tikz}
-
+\usepackage{lscape}    % For landscape pages
+\usepackage{pdflscape}
 \usepackage{subcaption}
 
 \usetikzlibrary{arrows, shapes, positioning, shapes.geometric}
@@ -45,13 +46,15 @@
     \item Understand the operational principles of ultrasonic sensors to optimize their performance for obstacle detection.
     \item Explore the application of ultrasonic sensors in scenarios, where systems like cameras and LiDAR fail because of smoke or dusty particles, demonstrating potential use of ultrasonic sensors
     \begin{itemize}
-        \item Develop an obstacle-detection helmet for firefighters in thick smoke conditions common in firefighting scenarios        \item Review the benefits of this application and explore how similar improvements can be applied to robotics navigation systems
+        \item Develop an obstacle-detection helmet for firefighters in thick smoke conditions common in firefighting scenarios        
+        \item Review the benefits of this application and explore how similar improvements can be applied to robotics navigation systems
     \end{itemize}
 \end{itemize}
 
 
 \section{Background}
-    Ultrasonic sensors offer an advantage over LiDAR and cameras, especially in dusty or smoke-filled conditions. Unlike cameras, which rely on visibility and light, and LiDAR, which can be scattered by particles in the air during mapping(refer to Appendix A), ultrasonic sensors use sound waves. This allows them to detect obstacles in environments where visual and optical methods fail.\\This makes ultrasonic sensors a valuable tool for applications such as firefighting, where LIDAR and cameras may not be practical.\\\\""Obstacle Helmet project description here""
+    Ultrasonic sensors offer an advantage over LiDAR and cameras, especially in dusty or smoke-filled conditions. Unlike cameras, which rely on visibility and light, and LiDAR, which can be scattered by particles in the air during mapping (refer to Appendix A, Figure~\ref{fig:lidar_mapping_smoke}), ultrasonic sensors use sound waves. This allows them to detect obstacles in environments where visual and optical methods fail.\\This makes ultrasonic sensors a valuable tool for applications such as firefighting, where LiDAR and cameras may not be practical.\\\\Our project aims to integrates an ultrasonic sensor system mounted on firefighter helmets to assist navigating smoke-filled rooms. The helmet is equipped with an ultrasonic sensor that continuously scans the environment, detecting objects and obstacles in the firefighter's path. The system provides real-time feedback through an LED, which alerts the firefighter when an obstacle is within a critical range (defined as the "threshold distance"). This is especially crucial in environments where firefighters might be blinded by thick smoke.\\The following chapters showcase the results of multiple rounds of iteration and testing of our system across different scenarios and environmental conditions.
+   
 
 
 \chapter{Project Components}
@@ -59,18 +62,18 @@
 
 \subsection{Microcontroller}
 \begin{itemize}
-    \item \textbf{Arduino Leonardo Pro Micro (Quantity: 1)}: Compact, suited for embedded applications due to its small size. It was selected for this project because of its portability and the sufficient number of I/O pins for basic control and sensor connections.
+    \item \textbf{Arduino Leonardo Pro Micro (Quantity: 1)}: Compact and ideal for embedded applications due to its small size, this component was chosen for the project because of its portability and the adequate number of I/O pins, which are sufficient for basic control and sensor connections.
 \end{itemize}
 
 \subsection{Sensors}
-The project uses the following sensors:
+%The project uses the following sensors:
 \begin{itemize}
     \item \textbf{Ultrasonic Sensor HC-SR04 (Quantity: 1)}: The HC-SR04 works by emitting ultrasonic sound waves and measuring the time it takes for the sound waves to reflect off an object and return to the sensor. The distance from the object can be determined by calculating the time difference, making it a reliable sensor for obstacle detection.
 \end{itemize}
 
 \subsection{Actuators}
 \begin{itemize}
-    \item \textbf{TowerPro SG90 Mini Micro Digital Servo 9g (Quantity: 1)}: Used to enable automated panning movements through integration with an Arduino, allowing for programmed motion control in the system.
+    \item \textbf{TowerPro SG90 Mini Micro Digital Servo 9g (Quantity: 1)}: This component is used to enable automated panning movements by integrating it with an Arduino, allowing for programmed motion control within the system.
 \end{itemize}
 
 \section{Software Components}
@@ -112,6 +115,7 @@ This block diagram describes generally the interactions between the components. 
         \node (obstacle) [draw, rectangle, below=of clear, yshift=-1cm] {Facing obstacle}; 
         \node (on) [draw, rectangle, below=of obstacle] {Switches ON as warning};
         \node (matlab) [draw, rectangle, above=of arduino] {MATLAB Software};
+        \node (human) [draw, rectangle, right=of obstacle] {Human};
     
         % Arrows
         \draw[<->] (sensor.east) -- ++(0.3,0) |- (arduino.west |- sensor.east);
@@ -122,6 +126,8 @@ This block diagram describes generally the interactions between the components. 
         \draw[->] (obstacle.south) -- (on.north);
         \draw[->] (obstacle.north) -- (clear.south);
         \draw[<->] (matlab.south) -- (arduino.north);
+        \draw[->] (clear) -- (human.north);
+        \draw[->] (on.east) -- (human.south);
     
     \end{tikzpicture}
     \caption{Block diagram of the obstacle detection system.}
@@ -175,7 +181,15 @@ This block diagram describes generally the interactions between the components. 
             \item \textbf{Output}: Displays real-time visualizations of the scanned environment in the form of polar plots.
         \end{itemize}
 
+    \item \textbf{Human}:
+        \begin{itemize}
+            \item \textbf{Input}: Receives signal from the Red LED Warning light that will indicate if an obstacle is present.
+            \item \textbf{Output}: Makes the decision to navigate through the environment.
+        \end{itemize}
+
 \end{itemize}
+
+The information flow of the system will be further elaborated in the algorithm overview in \autoref{subsec:Algorithm Overview}.
 
 % \begin{itemize}
 %     \item \textbf{Power Supply}: 
@@ -194,35 +208,36 @@ This block diagram describes generally the interactions between the components. 
 %     \item \textbf{MATLAB Software}: The MATLAB software receives distance and angle data from the Arduino Leonardo, processes it, and generates real-time visualizations. The software aids in visualizing the scanned environment, providing the user with immediate feedback on the surrounding obstacles.
 
 % \end{itemize}
+\newpage 
 
 \section{Circuit Diagram}
 % Include a schematic of the circuit showing the connections between the sensor, actuators, HMI, and microcontroller.
 
-\textbf{The following description might not be applicable once pictorial diagram is not used.} \\
+% \textbf{The following description might not be applicable once pictorial diagram is not used.} \\
 
 %  Remove if page exceeds 15
-The circuit diagram is designed for compactness and clarity. This is to ensure that the wiring is organized for ease of troubleshooting and maintenance. The overall circuit design is laid out on a breadboard which facilitates rapid prototyping where the modular approach allows for easy reconfiguration or replacement of each component.
+The circuit diagram is designed for compactness and clarity. This is to ensure that the wiring is organized for ease of troubleshooting and maintenance. The overall circuit design is laid out on a breadboard which facilitates rapid prototyping where the modular approach allows for easy reconfiguration or replacement of each component. 
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=1\linewidth]{Circuit_schem.png}
-    \caption{Helmet circuit diagram.}
+    \caption{System Schematic View.}
     \label{fig:enter-label}
 \end{figure}
 
-The following colour coding scheme has been adopted in the wiring to ensure clarity and to minimize errors during component integration and troubleshooting:
-\begin{itemize}
-    \item 
-\end{itemize}
+
+ This system schematic offers a detailed look at the electrical connections and layout, emphasizing modularity and scalability in the design,  allowing the system to be easily expanded with additional sensors or components. Unlike high-level block diagrams, the schematic clearly illustrates how each component interfaces with the Arduino Leonardo for real-time obstacle detection.
+\newline
+
+ A pictorial view of the circuit is provided in the Appendix, Figure ~\ref{fig:circuit_diagram}
+
 
 \chapter{Implementation}
 \section{Overview}
-The implementation is divided into two key components. The first component focuses on testing the sensor's accuracy and adjusting the speed of sound in the code, including conducting proximity and maximum range tests.
-
-The second component involves integrating the sensor with a servo, developing a warning system, and visualizing the user's field of vision through a MATLAB graph.
+The implementation is divided into two primary phases. The first phase focuses on testing the Ultrasonic Sensor's accuracy and adjusting the speed of sound in the code, including conducting proximity and maximum range tests.\\\\The second phase involves integrating the sensor with a Servo, developing a warning system, and visualizing the user's field of vision through a MATLAB graph.
 \section{Sensor Characterization}
 
-To understand the accuracy and performance of the ultrasonic sensor, we first determine the equation used for calculating distance. The fundamental equation for calculating the distance from the sensor is:
+To evaluate the sensor's accuracy and performance, we first identify the equation used to calculate distance. The fundamental equation for determining the distance from the sensor is:
 
 \[
 d = \frac{v \cdot t}{2}
@@ -236,7 +251,7 @@ where:
 
 \subsection{Linear Equation Formulation}
 
-When re-arranging the formula, we can express it in a linear form, comparable to the equation \( y = mx + c \), where:
+When rearranging the formula, we can express it in a linear form, similar to the linear equation: \( y = mx + c \), where:
 \[
 d = \frac{v}{2} \cdot t + 0
 \]
@@ -263,7 +278,7 @@ As shown in Figure~\ref{fig:sound_graph}, the gap between the two lines widens a
     \centering
     \includegraphics[width=0.5\linewidth]{image.png}
     \caption{Comparison between slopes of two different speeds}
-    \label{fig:enter-label}
+    \label{fig:sound_graph}
 \end{figure}
 
 \subsection{Test Data Analysis}
@@ -286,80 +301,15 @@ To validate this further, we performed tests with distances between 10 cm and 30
 \end{tabular}
 \end{table}
 
-The difference between the expected and measured distances grows larger as the distance increases. Minor anomalies in the data are expected due to sensor noise and environmental factors, but the overall trend shows increased distortion at longer distances.
+The gap between the expected and measured distances becomes more pronounced as the distance increases. While minor anomalies in the data are anticipated due to sensor noise and environmental factors, the overall trend indicates greater distortion at longer distances.
 
 \subsection{Determining the Speed of Sound}
 
-To achieve higher accuracy in distance measurement, a key step is to determine the actual speed of sound under the specific conditions. By rearranging the equation, we can make the speed of sound the subject:
+To achieve higher accuracy in distance measurement, a key step is to determine the actual speed of sound under specific conditions. By rearranging the equation, we can make the speed of sound the subject:
 \[
 v = \frac{2 \cdot d}{t}
 \]
-
-The MATLAB script provided below samples different distances and measures the time taken for the sound to return. By calculating the speed of sound at various distances and averaging the values, we can obtain a more accurate speed of sound for the given environment. \\\\\textbf{MATLAB Code:}
-
-% Define custom settings for lstlisting
-\lstset{
-    language=Matlab,                     % Set the language to MATLAB
-    backgroundcolor=\color{lightgray},   % Set background color for the code box
-    frame=single,                        % Add a frame around the code
-    basicstyle=\ttfamily,                % Use a typewriter font
-    keywordstyle=\color{blue},           % Set keyword color
-    commentstyle=\color[RGB]{0,128,0},   % Dark green color for comments
-    caption=MATLAB Code,                 % Caption for the code
-    breaklines=true,                     % Enable line breaking
-    breakatwhitespace=true,              % Allow line breaks at whitespace
-    showspaces=false,                    % Do not show spaces as symbols
-}
-
-
-\begin{lstlisting}
-% Initialize connection to Arduino
-a = arduino('COM3', 'Leonardo');  % Replace 'COM3' with your actual port
-triggerPin = 'D9';
-echoPin = 'D10';
-
-% Define known distances (in meters)
-distances = [0.10, 0.20, 0.30, 0.40, 0.50, 0.60, 0.70, 0.80, 0.90, 1.0];  % Known distances
-
-% Initialize an empty array to store time values
-time_values = zeros(1, length(distances));
-
-% Loop through the number of measurements (one for each distance)
-for i = 1:length(distances)
-    disp(['Place the object at ' num2str(distances(i)) ' meters']);
-    pause(10);  % Give time to adjust the object
-    
-    % Take measurement from the HC-SR04 sensor
-    time_taken = readUltrasonicDistance(a, triggerPin, echoPin);  % Time taken (in seconds)
-    
-    % Store the recorded time
-    time_values(i) = time_taken;
-    
-    % Display the recorded time for user feedback
-    disp(['Time recorded for ' num2str(distances(i))'meters: ' num2str(time_taken) 'seconds']);
-    
-    pause(1);  % Pause before the next measurement
-end
-
-% Calculate speed of sound for each distance using v = 2 * d / t
-speed_of_sound_values = (2 .* distances) ./ time_values;
-
-% Calculate the mean speed of sound
-mean_speed_of_sound = mean(speed_of_sound_values);
-
-% Display results
-disp('Recorded time values (in seconds):');
-disp(time_values);
-
-disp('Speed of sound values for each distance (in m/s):');
-disp(speed_of_sound_values);
-
-disp('Mean speed of sound (in m/s):');
-disp(mean_speed_of_sound);
-
-% Clean up the connection
-clear a;
-\end{lstlisting}
+The MATLAB script provided in A.10 samples various distances and records the time taken for the sound to return. By calculating the speed of sound at different distances and averaging the results, we can determine a more accurate speed of sound for a specific environment, improving the overall precision of the sensor system. 
 
 
 \subsection{Improved Results with Calculated Speed of Sound}
@@ -369,12 +319,11 @@ Using the calculated mean speed of sound, we can improve the accuracy of our dis
 \begin{figure}[h]
     \centering
     % Assuming another graph will be inserted here showing the improved accuracy with calculated speed of sound
-    \includegraphics[width=0.5\textwidth]{calibrated_sound_example.png}
+    \includegraphics[width=1\textwidth]{calibrated_sound_example.png}
     \caption{Distance vs Time: Improved Accuracy with Calculated Speed of Sound}
     \label{fig:calibrated_graph}
 \end{figure}
-
-This graph demonstrates that with a more accurate speed of sound, the measured values align closely with the expected values, leading to better sensor performance and fewer distortions over long distances.
+This graph illustrates that by using a more accurate speed of sound, the measured values closely match the expected values, resulting in improved sensor performance and reduced distortions, especially over longer distances.
 
 \subsection{Conclusion}
 
@@ -384,88 +333,150 @@ By determining and using the calculated speed of sound, we enhance the accuracy 
 
 \section{Sensor, Servo and Warning System Integration}
 
-\begin{figure}[h]
-    \centering
-    \includegraphics[width=1.1\textwidth]{Ultrasonic Servomotor-Algo & Logic.png} % Adjust width as necessary
-    \caption{Flowchart of the Pan Angle Routine}
-    \label{fig:flowchart}
-\end{figure}
-
 \tikzstyle{startstop} = [rectangle, rounded corners, minimum width=3cm, minimum height=1cm,text centered, draw=black]
 \tikzstyle{process} = [rectangle, minimum width=3cm, minimum height=1cm, text centered, draw=black]
 \tikzstyle{decision} = [diamond, minimum width=3cm, minimum height=1cm, text centered, draw=black]
 \tikzstyle{arrow} = [thick,->,>=stealth]
 
-\begin{tikzpicture}[node distance=3.5cm, auto, scale=0.7, transform shape]
+% \begin{tikzpicture}[node distance=3.5cm, auto, scale=0.7, transform shape]
 
-    % Nodes
-    \node (start) [startstop] {Start};
-    \node (init) [process, below of=start] {Initialize Plot table, Sensors and Servo objects};
-    \node (setthreshold) [process, below of=init] {Set obstacle\_threshold = 60cm};
-    \node (while) [decision, below of=setthreshold] {While 1};
-    \node (checkangle) [decision, below of=while, yshift=-1.5cm] {Is pan\_angle $<$= 180};
-    \node (panangle) [process, right of=checkangle, xshift=3cm] {pan\_angle = pan\_angle + 1};
-    \node (subroutine) [process, below of=checkangle, yshift=-1.5cm] {PanAngleSubRoutine};
-    \node (end) [startstop, below of=subroutine, yshift=-1cm] {End};
-    \node (isanglepos) [decision, right of=panangle, xshift=3cm] {Is pan\_angle $>$= 0};
-    \node (subroutine2) [process, below of=isanglepos, yshift=-1cm] {PanAngleSubRoutine};
-    \node (incangle) [process, below of=subroutine2, yshift=-1cm] {pan\_angle = pan\_angle + 1};
+%     % Nodes
+%     \node (start) [startstop] {Start};
+%     \node (init) [process, below of=start] {Initialize Plot table, Sensors and Servo objects};
+%     \node (setthreshold) [process, below of=init] {Set obstacle\_threshold = 60cm};
+%     \node (while) [decision, below of=setthreshold] {While 1};
+%     \node (checkangle) [decision, below of=while, yshift=-1.5cm] {Is pan\_angle $<$= 180};
+%     \node (panangle) [process, right of=checkangle, xshift=3cm] {pan\_angle = pan\_angle + 1};
+%     \node (subroutine) [process, below of=checkangle, yshift=-1.5cm] {PanAngleSubRoutine};
+%     \node (end) [startstop, below of=subroutine, yshift=-1cm] {End};
+%     \node (isanglepos) [decision, right of=panangle, xshift=3cm] {Is pan\_angle $>$= 0};
+%     \node (subroutine2) [process, below of=isanglepos, yshift=-1cm] {PanAngleSubRoutine};
+%     \node (incangle) [process, below of=subroutine2, yshift=-1cm] {pan\_angle = pan\_angle + 1};
 
-    % Arrows
-    \draw [arrow] (start) -- (init);
-    \draw [arrow] (init) -- (setthreshold);
-    \draw [arrow] (setthreshold) -- (while);
-    \draw [arrow] (while) -- node[anchor=east] {True} (checkangle);
-    \draw [arrow] (checkangle.east) -- node[anchor=south] {True} (panangle.west);
-    \draw [arrow] (checkangle.south) -- node[anchor=east] {False} (subroutine.north);
-    \draw [arrow] (subroutine.south) -- (end.north);
-    \draw [arrow] (panangle.east) -- (isanglepos.west);
-    \draw [arrow] (isanglepos.south) -- node[anchor=west] {True} (subroutine2.north);
-    \draw [arrow] (subroutine2.south) -- (incangle.north);
-    \draw [arrow] (incangle.south) -- ++(0,-0.1) -- ++(-3,0) -- (end.east);
-
-
-    % Arrow for False in "Is pan_angle <= 180"
-    \draw [arrow] (checkangle.west) -- ++(-1.5,0) -- ++(0,-3.5) -- (end.west);
-    \draw [arrow] (isanglepos.north) -- ++(0,0) -- ++(0,2) -- (while.east) node[anchor=south] {False};
-\end{tikzpicture}
-
-\begin{tikzpicture}[node distance=2cm]
-\node {Start};
-\node (init) [process, below of=start] {Initialize Plot table, Sensors and Servo objects};
-\node (setthreshold) [process, below of=init, xshift=2cm] {Is pan_angle \$>$= 0};
-% \node (7980d08d-0ce1-407a-80b4-676b4445469e) [7ff96343-bf0c-5a3f-a35c-f0ea1bb7638b, below of=6b2250fe-453a-41f4-a56b-e44b0975896e] {Set obstacle threshold = 60cm};
-% \node (a62e3ee2-ebd7-4370-96cc-e3c88a4ed946) [27437e67-9b34-5aec-9a46-e8b95f63a13b, right of=7980d08d-0ce1-407a-80b4-676b4445469e, xshift=2cm] {PanAngleSubRoutine};
-% \node (b290f74f-4283-404d-a761-845259b4e4e0) [b0e005f8-e267-5a3a-a638-881fb9faed1d, below of=7980d08d-0ce1-407a-80b4-676b4445469e, yshift=-0.5cm] {While 1};
-% \node (abc73629-545a-47dd-b747-678b99a956f4) [574b93ce-5d31-5729-9ed0-9a79e73d4725, right of=b290f74f-4283-404d-a761-845259b4e4e0, xshift=2cm] {pan_angle += 1};
-% \node (b38b0459-b4d4-47a9-af32-32b7190ce383) [612da6d3-b8da-51bb-9c1f-0240c7a7df03, below of=b290f74f-4283-404d-a761-845259b4e4e0, yshift=-0.5cm] {Is pan angle <= 180};
-% \node (84369e61-095a-43a2-96e8-38f6831d25e3) [69bbb168-da59-5865-902f-94e77902bf95, right of=b38b0459-b4d4-47a9-af32-32b7190ce383, xshift=2cm] {End};
-% \node (8a7a8753-0bfc-4d1d-8f7f-946086dda5a6) [574b93ce-5d31-5729-9ed0-9a79e73d4725, left of=b38b0459-b4d4-47a9-af32-32b7190ce383, xshift=-2cm] {pan_angle += 1};
-% \node (f4f8bbaf-b28a-4347-b011-de8e1a0929a2) [27437e67-9b34-5aec-9a46-e8b95f63a13b, below of=b38b0459-b4d4-47a9-af32-32b7190ce383, yshift=-0.5cm] {PanAngleSubRoutine};
-% \draw [7be24b85-97d0-5b76-ba9e-d94005dca8f2] (ff54e9e3-eb59-4bf0-9259-01af05d0aee7) --  (6b2250fe-453a-41f4-a56b-e44b0975896e);
-% \draw [7be24b85-97d0-5b76-ba9e-d94005dca8f2] (6b2250fe-453a-41f4-a56b-e44b0975896e) --  (7980d08d-0ce1-407a-80b4-676b4445469e);
-% \draw [7be24b85-97d0-5b76-ba9e-d94005dca8f2] (7980d08d-0ce1-407a-80b4-676b4445469e) --  (b290f74f-4283-404d-a761-845259b4e4e0);
-% \draw [7be24b85-97d0-5b76-ba9e-d94005dca8f2] (b38b0459-b4d4-47a9-af32-32b7190ce383) -- node[anchor=east] {True} (f4f8bbaf-b28a-4347-b011-de8e1a0929a2);
-% \draw [7be24b85-97d0-5b76-ba9e-d94005dca8f2] (ab369489-74f9-4ffc-80c9-87d2a3e820bd) --  (a62e3ee2-ebd7-4370-96cc-e3c88a4ed946);
-% \draw [7be24b85-97d0-5b76-ba9e-d94005dca8f2] (a62e3ee2-ebd7-4370-96cc-e3c88a4ed946) --  (abc73629-545a-47dd-b747-678b99a956f4);
-% \draw [7be24b85-97d0-5b76-ba9e-d94005dca8f2] (f4f8bbaf-b28a-4347-b011-de8e1a0929a2) -|  (8a7a8753-0bfc-4d1d-8f7f-946086dda5a6);
-% \draw [7be24b85-97d0-5b76-ba9e-d94005dca8f2] (8a7a8753-0bfc-4d1d-8f7f-946086dda5a6) --  (b38b0459-b4d4-47a9-af32-32b7190ce383);
-% \draw [7be24b85-97d0-5b76-ba9e-d94005dca8f2] (b290f74f-4283-404d-a761-845259b4e4e0) --  (b38b0459-b4d4-47a9-af32-32b7190ce383);
-% \draw [7be24b85-97d0-5b76-ba9e-d94005dca8f2] (b38b0459-b4d4-47a9-af32-32b7190ce383) -- node[anchor=east] {False} (ab369489-74f9-4ffc-80c9-87d2a3e820bd);
-% \draw [7be24b85-97d0-5b76-ba9e-d94005dca8f2] (ab369489-74f9-4ffc-80c9-87d2a3e820bd) |- node[anchor=south] {False} (b290f74f-4283-404d-a761-845259b4e4e0);
-% \draw [7be24b85-97d0-5b76-ba9e-d94005dca8f2] (abc73629-545a-47dd-b747-678b99a956f4) --  (84369e61-095a-43a2-96e8-38f6831d25e3);
-\end{tikzpicture}
+%     % Arrows
+%     \draw [arrow] (start) -- (init);
+%     \draw [arrow] (init) -- (setthreshold);
+%     \draw [arrow] (setthreshold) -- (while);
+%     \draw [arrow] (while) -- node[anchor=east] {True} (checkangle);
+%     \draw [arrow] (checkangle.east) -- node[anchor=south] {True} (panangle.west);
+%     \draw [arrow] (checkangle.south) -- node[anchor=east] {False} (subroutine.north);
+%     \draw [arrow] (subroutine.south) -- (end.north);
+%     \draw [arrow] (panangle.east) -- (isanglepos.west);
+%     \draw [arrow] (isanglepos.south) -- node[anchor=west] {True} (subroutine2.north);
+%     \draw [arrow] (subroutine2.south) -- (incangle.north);
+%     \draw [arrow] (incangle.south) -- ++(0,-0.1) -- ++(-3,0) -- (end.east);
 
 
-The algorithm implemented in this project enables the ultrasonic sensor to perform automated panning movements using a servomotor, allowing the sensor to scan the surrounding environment and detect obstacles within a specified threshold distance.
+%     % Arrow for False in "Is pan_angle <= 180"
+%     \draw [arrow] (checkangle.west) -- ++(-1.5,0) -- ++(0,-3.5) -- (end.west);
+%     \draw [arrow] (isanglepos.north) -- ++(0,0) -- ++(0,2) -- (while.east) node[anchor=south] {False};
+% \end{tikzpicture}
+
+\begin{figure}[H]
+    \begin{tikzpicture}[node distance=3cm, auto, scale=0.8, transform shape]
+        % Nodes
+        \node (start) [startstop] {Start};
+        \node (init) [process, below of=start] {Initialize Plot table, Sensors and Servo objects};
+        \node (setthreshold) [process, below of=init] {Set obstacle\_threshold = 60cm};
+        \node (while) [decision, below of=setthreshold] {While 1};
+        \node (checkangle) [decision, below of=while, yshift=-1cm] {Is pan\_angle $<$= 70};
+        \node (panangle) [process, left of=checkangle, xshift=-3cm, yshift=-2cm] {pan\_angle = pan\_angle + 1};
+        \node (subroutine) [process, below of=checkangle, yshift=-1cm] {PanAngleSubRoutine};
+        % End program
+        % \node (end) [startstop, below of=incangle, yshift=-18cm, xshift=7cm] {End};
+        \node (isanglepos) [decision, right of=checkangle, xshift=4cm] {Is pan\_angle $>$= 50};
+        \node (subroutine2) [process, below of=isanglepos, yshift=-0.5cm] {PanAngleSubRoutine};
+        \node (incangle) [process, below of=subroutine2] {pan\_angle = pan\_angle - 1};
+        % \node (end) [startstop, below of=incangle] {End};
+        % \node (false1) [left of=checkangle, xshift=-2cm] {False};
+        % \node (true1) [above of=checkangle, yshift=0.5cm] {True};
+        % \node (false2) [left of=isanglepos, xshift=-2cm] {False};
+        % \node (true2) [above of=isanglepos, yshift=0.5cm] {True};
+    
+        % Arrows
+        \draw [arrow] (start) -- (init);
+        \draw [arrow] (init) -- (setthreshold);
+        \draw [arrow] (setthreshold) -- (while);
+        \draw [arrow] (while) -- (checkangle);
+        \draw [arrow] (checkangle.east) -- node[anchor=south] {False} (isanglepos.west);
+        \draw [arrow] (checkangle.south) -- node[anchor=east] {True} (subroutine.north);
+        % \draw [arrow] (subroutine.west) -- (panangle.south);
+        \draw [arrow] (subroutine.west) -- ++(0,0) -- ++(-3.94,0) -- (panangle.south);
+        % \draw [arrow] (subroutine.south) -- (end.north);
+        % \draw [arrow] (panangle.north) -- (checkangle.west);
+        \draw [arrow] (panangle.north) -- ++(0,0) -- ++(0,1.5) -- (checkangle.west);
+        \draw [arrow] (isanglepos.south) -- node[anchor=west] {True} (subroutine2.north);
+        % \draw [arrow] (isanglepos.north) -- node[anchor=south] {False} (while.east);
+        \draw [arrow] (isanglepos.north) -- ++(0,0) -- ++(0,1.8) -- (while.east) node[anchor=south] {False};
+        \draw [arrow] (subroutine2.south) -- (incangle.north);
+        % End program
+        % \draw [arrow] (incangle.south) -- (end.north);
+        \draw [arrow] (incangle.west) -- ++(-14,0) -- ++(0,10.5) -- ++(0,0) -- (while.west);
+        % \draw [arrow] (incangle.south) -- ++(0,0) -- ++(0,0) -- (end.north);
+        
+        
+        % \draw [arrow] (isanglepos.north) -- ++(0,0) -- ++(0,2) -- (while.east) node[anchor=south] {False};
+        % \draw [arrow] (checkangle.west) -- ++(-1.5,0) -- ++(0,-3.5) -- (end.west);
+    \end{tikzpicture}
+    \caption{Flowchart of the Pan Angle Routine}
+    \label{fig:flowchart}
+\end{figure}
+The algorithm implemented in this project allows the ultrasonic sensor to perform automated panning movements using a servo motor. This enables the sensor to scan the surrounding environment and detect obstacles within a specified threshold distance.
 
 \subsection{Algorithm Overview}
+\label{subsec:Algorithm Overview}
+This flowchart depicts the Pan Angle Routine used for controlling the servo motor's angle while scanning the surroundings with an ultrasonic sensor. The routine ensures that the servo motor pans the sensor back and forth between defined angles to provide obstacle detection over a wide field of view. 
 \begin{enumerate}
-    \item \textbf{Initialization:}
-     The code mainly setups the necessary peripherals for control and sensor reading. Additionally, to visualize the obstacles on a graph, a plot table on MATLAB is created. For the warning system, the obstacle detection threshold is set at \textbf{60 cm}.
+    \item \textbf{Start:}
+    The routine begins when the system is activated and moves directly into initialization.
+    
+    \item \textbf{Initialize Components:}
+    The system initializes key components:
+    \begin{itemize}
+        \item \textbf{Plot table:} Plots a graph from angle and distance readings.
+        \item \textbf{Sensors:} Ultrasonic sensor is prepared to take measurements.
+        \item \textbf{Servo motor:} Controls the sensor’s panning motion.
+    \end{itemize}
+    
+    \item \textbf{Set Obstacle Threshold:}
+    The obstacle detection threshold is set to 60 cm, classifying objects within this distance as obstacles.
+    
+    \item \textbf{Continuous Scanning:}
+    The system enters an infinite \texttt{while} loop, controlling the servo motor and taking distance measurements.
+    
+    \item \textbf{Check Pan Angle ($\leq 70^\circ$):}
+    The system checks if \texttt{pan\_angle} is less than or equal to 70:
+    \begin{itemize}
+        \item \textbf{True}: Increments the pan angle and calls the \texttt{PanAngleSubRoutine}.
+        \item \textbf{False}: Moves to the next decision block.
+    \end{itemize}
+    
+    \item \textbf{Increment Pan Angle:}
+    If \texttt{pan\_angle} is less than or equal to 70, it increases by 1 degree. The sensor covers more of the environment on the right, and the system calls \texttt{PanAngleSubRoutine} to take measurements.
+    
+    \item \textbf{PanAngleSubRoutine:}
+    This subroutine performs:
+    \begin{itemize}
+        \item Distance measurement using the ultrasonic sensor.
+        \item Data storage (angle and distance) in the plot table.
+        \item Obstacle detection based on the 60 cm threshold.
+    \end{itemize}
+    
+    \item \textbf{Check Pan Angle ($\geq 50^\circ$):}
+    If \texttt{pan\_angle} exceeds 70 degrees, the system checks if it is greater than or equal to 50:
+    \begin{itemize}
+        \item \textbf{True}: Decrements the pan angle and calls the \texttt{PanAngleSubRoutine}.
+        \item \textbf{False}: The process ends or resets.
+    \end{itemize}
+    
+    \item \textbf{Decrement Pan Angle:}
+    If \texttt{pan\_angle} is greater than or equal to 50, it decreases by 1 degree. The servo moves the sensor left, and \texttt{PanAngleSubRoutine} is called again to capture data.
 
-    \item \textbf{Continuous Scanning Loop:}
-    While the system continuously loops, the servo pans between two angles to emulate the user's field of vision. In between the loops, a routine called \textbf{PanAngleSubRoutine} retrieves ultrasonic sensor readings and makes a decision to warn the user based on detection threshold. 
+    % \item \textbf{Initialization:}
+    %  The code mainly setups the necessary peripherals for control and sensor reading. Additionally, to visualize the obstacles on a graph, a plot table on MATLAB is created. For the warning system, the obstacle detection threshold is set at \textbf{60 cm}.
+
+    % \item \textbf{Continuous Scanning Loop:}
+    % While the system continuously loops, the servo pans between two angles to emulate the user's field of vision. In between the loops, a routine called \textbf{PanAngleSubRoutine} retrieves ultrasonic sensor readings and makes a decision to warn the user based on detection threshold. 
 \end{enumerate}
 
 \subsection{Parameter Determination}
@@ -487,11 +498,9 @@ The algorithm implemented in this project enables the ultrasonic sensor to perfo
     \item \textbf{Panning Range:} The panning range is set between \textbf{50° and 70°}.
 \end{itemize}
 
+\newpage
 
 {\let\clearpage\relax \chapter{Code}}
-
-\section{Main Code}
-
 % Define custom settings for lstlisting
 \lstset{
     language=C++,                         % Set the language to C++
@@ -506,6 +515,296 @@ The algorithm implemented in this project enables the ultrasonic sensor to perfo
     breaklines=true,                      % Enable line breaking
     breakatwhitespace=true,               % Allow breaking at whitespace
 }
+
+\section{Code Snippets and Explanations}
+
+This section presents key snippets from the Arduino code, explaining their significance and purpose in the application. The entire main application code can be found here See the main code in Listing~\ref{lst:maincode}.
+
+\subsection{Ultrasonic Sensor Triggering and Distance Calculation}
+
+The following code snippet triggers the ultrasonic sensor to emit a sound wave and measures the time of flight (TOF) for the echo to return. It then calculates the distance to the obstacle using the speed of sound.
+
+\begin{lstlisting}
+// Function to read distance from ultrasonic sensor
+float readSensor(){
+    // Generate trig pulse to start
+    digitalWrite(trigPin, LOW);          // Set trigger pin low
+    delayMicroseconds(2);                // Wait 2 microseconds
+    digitalWrite(trigPin, HIGH);         // Set trigger pin high to send pulse
+    delayMicroseconds(10);               // Hold pulse for 10 microseconds
+    digitalWrite(trigPin, LOW);          // Stop pulse
+    
+    // Measure Time of Flight (TOF)
+    t = pulseIn(echoPin, HIGH);          // Capture the duration for echo return
+    
+    // Calculate the distance using the speed of sound in air (343 m/s)
+    d = scale * t * 343 / 2;             // Distance = (TOF * speed of sound) / 2
+    
+    // Display the calculated distance on serial monitor
+    Serial.print("Distance: ");
+    Serial.print(d);
+    Serial.println(" cm");
+    
+    return d;                            // Return the measured distance
+}
+\end{lstlisting}
+
+\textbf{Explanation:}  
+This function sends a pulse through the ultrasonic sensor using the `trigPin` and measures how long it takes for the echo to return via `echoPin`. The time measured (\texttt{t}) is then used to calculate the distance \(d\) based on the formula:
+\[
+\text{Distance} = \frac{\Delta t \times 343}{2}
+\]
+where \(343 \, \text{m/s}\) is the speed of sound in air at room temperature. The result is printed on the serial monitor for debugging purposes.
+
+\subsection{Servo Sweeping Mechanism and Distance Averaging}
+
+The code snippet below sweeps the servo motor across a specified range of angles, takes multiple readings from the ultrasonic sensor, and computes the average distance for better accuracy.
+
+\begin{lstlisting}
+// Sweep the servo and measure distance at each position
+for (int angle = 50; angle <= 70; angle += 6) {
+    servoX.write(angle);                 // Move the servo to the current angle
+    delayMicroseconds(200);              // Delay to allow the servo to move
+    
+    // Read the distance twice to reduce noise
+    float dist1 = readSensor();          // First distance reading
+    delayMicroseconds(10);               // Short delay between readings
+    float dist2 = readSensor();          // Second distance reading
+    
+    // Compute the average distance
+    float dist = (dist1 + dist2) / 2;    // Average the two distance readings
+    
+    // Check if obstacle is within the defined threshold
+    checkObstacleThreshold(dist);        // Function to warn if within threshold
+}
+\end{lstlisting}
+
+\textbf{Explanation:}  
+This loop moves the servo motor from 50 degrees to 70 degrees in increments of 6 degrees. At each position, the ultrasonic sensor measures the distance twice, and the average of the two readings is computed to minimize measurement noise. This helps ensure more accurate detection of obstacles. The distance is then checked against the obstacle threshold (60 cm), and if the obstacle is too close, a warning (LED) is triggered.
+
+\subsection{Obstacle Detection and LED Warning}
+
+The code snippet checks whether the measured distance is below the defined threshold and activates a warning LED if an obstacle is detected.
+
+\begin{lstlisting}
+// Function to check if the obstacle is within threshold distance
+void checkObstacleThreshold(float dist) {
+    if (dist < obstacleThreshold && dist > 0) {  // If distance is valid and below threshold
+        digitalWrite(warningLedPin, HIGH);       // Turn on the warning LED
+    } else {
+        digitalWrite(warningLedPin, LOW);        // Turn off the warning LED
+    }
+}
+\end{lstlisting}
+
+\textbf{Explanation:}  
+This function compares the measured distance \texttt{dist} to the predefined threshold value \texttt{obstacleThreshold} (60 cm). If the object is detected within this range and the distance is valid (greater than 0), the warning LED connected to \texttt{warningLedPin} is turned on. If the object is farther away or no valid reading is detected, the LED remains off.
+
+{\let\clearpage\relax \chapter{Testing and Results}}
+
+
+\section{Overview}
+This section aims to characterize the ultrasonic sensor by examining its performance under various conditions, including its deadband in close proximity, maximum measurable distance, and accuracy influenced by environmental temperature and humidity. To ensure measurement accuracy, the actual speed of sound, affected by these environmental factors, is determined and used for calibration.\\\\Additionally, a test case regarding firefighting application with an ultrasonic sensor is done to evaluate the performance of the sensor in thick smoke conditions.\\\\The test cases are summarized in the following key points:
+
+
+\begin{itemize}
+    \item Comparison between expected distances and measured distance (accuracy)
+    \item Testing the minimum detectable distance (close proximity)
+    \item Testing the maximum detectable distance (range limit)
+    \item Evaluation of object sensing in conditions with smoke (Firefighting application)
+\end{itemize}
+
+    
+\section{Testing Setup}
+The test environment is depicted in the figure listed here: \textbf{Figure~\ref{fig:testroom}}
+
+\begin{itemize}
+    \item \textbf{Location:} Living room, flat surface, 9 metres length and 5 metres wide of space for testing. 
+    \item \textbf{Sensor Accuracy Challenges:} Initial distance measurements showed slight discrepancies, primarily due to variations in environmental temperature and humidity. These factors affected the speed of sound, requiring adjustments on the speed of sound in code to achieve accurate readings.
+    
+\end{itemize}
+
+
+\section{Results}
+
+\subsection{Sensor Characterization: Accuracy}
+A scatter plot with a trend line was used to determine the speed of sound under the test room conditions, yielding \textbf{a value of 326 m/s at 30°C.} \textbf{(see Figure~\ref{fig:scatter_plot_2})}
+
+
+\subsection{Sensor Characterization: Close Proximity}
+The sensor detects objects at a minimum distance of \textbf{1.5 cm}. Distances below \textbf{1 cm} fall within its "dead band," producing errors like "985 cm" and "900 cm." Although the HC-SR04's specified dead band is \textbf{2 cm}, this variation may be due to manufacturing quality. However, in the firefighting scenario, close proximity of 2 cm or less is not an issue, as the threshold is set at \textbf{60 cm}, providing sufficient room for the firefighter to maneuver.
+
+
+
+
+\subsection{Sensor Characterization: Maximum Range}
+As shown in this picture \textbf{Figure~\ref{fig:maximum_range_picture}}, the maximum detection range was found to be \textbf{414 cm}, beyond which the sensor fails to detect the marker and may pick up other objects. In the firefighting application, this range is sufficient, as the alert threshold is set at \textbf{60 cm}, allowing the firefighter ample room to avoid obstacles.
+
+
+\subsection{Sensor Application: Firefighting Scenario}
+
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}[b]{0.3\linewidth}
+        \centering
+       \raisebox{0.5cm}{\includegraphics[width=\linewidth]{Threshold Test 0.png}}
+        \caption{Outside detection range.}
+        \label{fig:safe-zone}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.3\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{Threshold Test 1.png}
+        \caption{LED triggered within threshold.}
+        \label{fig:threshold-warning}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.3\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{Threshold Test 3.png}
+        \caption{Outside field of view range.}
+        \label{fig:within-threshold}
+    \end{subfigure}
+    
+    \caption{Various states of obstacle detection using the ultrasonic sensor helmet system.}
+    \label{fig:combined-images}
+\end{figure}
+
+
+
+\subsubsection{Threshold Test}
+The sensor's detection threshold was set at \textbf{60 cm} to provide adequate warning and maneuvering space for the firefighter. During testing, the sensor reliably detected obstacles within this range, triggering the red warning LED to switch ON.
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}[b]{0.45\linewidth}
+        \centering
+        \includegraphics[height=5cm]{Helmet with smoke.PNG}  % Adjust height as necessary
+        \caption{LED ON during smoke exposure.}
+        \label{fig:led-on}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.45\linewidth}
+        \centering
+        \includegraphics[height=5cm]{Smoke condition test.png}  % Adjust height as necessary
+        \caption{System when worn during smoke test.}
+        \label{fig:smoke-test}
+    \end{subfigure}
+    
+    \caption{Alternate views of LED activation and the system during smoke test.}
+    \label{fig:led-smoke-comparison}
+\end{figure}
+\subsubsection{Smoke Condition Test}
+In a smoke-filled box simulating firefighting conditions, the \textbf{sensor successfully detected obstacles}, demonstrating its potential for accurate detection in low-visibility environments. When obstacles were detected within the 60 cm threshold, the red warning LED was activated. These tests characterize the ultrasonic sensor's capabilities, guiding its effective application for obstacle detection in conditions where LiDAR and camera is less effective.
+
+
+
+
+
+{\let\clearpage\relax \chapter{Conclusion}}
+
+\vspace{-1.5em} % Adjust this value to control the spacing
+\section{Project Summary}
+
+This project demonstrated the effectiveness of ultrasonic sensors for obstacle detection in smoke-filled environments. Reliable distance measurements were obtained across varying conditions, with consistent accuracy. The system provided real-time visual feedback through an LED and utilized a servomotor for automated panning, expanding the sensor's field of view. These results highlight the potential of ultrasonic sensors in low-visibility scenarios and lay the groundwork for future improvements.
+
+
+
+
+
+\section{Challenges}
+
+During the project, several challenges were encountered:
+
+\begin{itemize}
+\item \textbf{Speed of Sound Variations}: The sensor readings \textbf{showed deviations of ±2 cm and more}, primarily due to environmental factors like temperature and humidity affecting the speed of sound.
+
+\textbf{\textit{Solution:}} To improve accuracy, the actual speed of sound was calculated by determining the slope from the relationship between measured and actual readings, accounting for the specific temperature and humidity conditions in each environment.
+
+    
+\item \textbf{Field of View (FOV) and Accuracy Tradeoff}: The initial wide FOV was unnecessary, as it included areas outside the user's direct path (his sides), leading to false positives. This caused the detection system to misidentify obstacles, resulting in the blinking of the warning system.
+
+\textbf{\textit{Solution:}} The FOV was narrowed to focus solely on the path in front of the user, \textbf{reducing false positives} and improving overall detection accuracy.
+    
+\end{itemize}
+
+
+\section{Future Improvements}
+
+\begin{itemize}
+
+    \item \textbf{Automatic Speed of Sound Adjustment:} Integrating temperature and humidity sensors to automatically tune the speed of sound variables in real-time, ensuring accurate distance measurements regardless of environmental conditions.
+    
+    \item \textbf{Sensor Fusion for Enhanced Robotic Applications:} With the current sensors on robotic platforms, the addition of an ultrasonic sensor would be advantageous for navigating conditions where LiDAR and cameras are less effective. Such as foggy, smoky, or dusty environments. This is particularly ideal for unmanned rescue missions, where navigating through hazardous conditions is crucial to fulfill mission objectives.
+\end{itemize}
+
+
+\appendix
+\chapter{Appendix}
+\section{Presentation Slides}
+Add any additional diagrams or illustrations that may help explain the system.
+
+
+\begin{landscape}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\linewidth]{Circuit_bb.png}
+    \caption{System Circuit Diagram }
+    \label{fig:circuit_diagram}
+\end{figure}
+\end{landscape}
+
+
+
+\section{Figures}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1.1\linewidth]{LidarMappingInSmoke.PNG}
+    \caption{Unreliable LiDAR mapping in smoky environments}
+    \label{fig:lidar_mapping_smoke}
+\end{figure}
+
+\begin{landscape}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\linewidth]{Trendgraph_ultrasonicreadings.png}
+    \caption{Ultrasonic Sensor Accuracy Trend}
+    \label{fig:scatter_plot_2}
+\end{figure}
+\end{landscape}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\linewidth]{Test room.jpg}
+    \caption{Testing room}
+    \label{fig:testroom}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\linewidth]{maximumrange.jpg}
+    \caption{Maximum range: 414cm}
+    \label{fig:maximum_range_picture}
+\end{figure}
+
+
+\section{The Main Code}
+% Define custom settings for lstlisting
+\lstset{
+    language=C++,                         % Set the language to C++
+    backgroundcolor=\color{lightgray},    % Set background color
+    frame=single,                         % Add a frame around the code
+    basicstyle=\ttfamily\footnotesize,    % Use a smaller font size (footnotesize)
+    keywordstyle=\color{blue},            % Color keywords
+    commentstyle=\color[RGB]{0,128,0},    % Dark green color for comments
+    caption=Arduino C++ Code for Sensor Application \& Sensor Characterization,             % Caption for the code
+    emph={setup, loop},                   % Specify function names to be bold
+    emphstyle=\bfseries,                  % Style for emphasized text (function names)
+    breaklines=true,                      % Enable line breaking
+    breakatwhitespace=true,               % Allow breaking at whitespace
+    label={lst:maincode}
+}
+
 
 \begin{lstlisting}
 #include <Servo.h>
@@ -626,266 +925,70 @@ void loop() {
 
 \end{lstlisting}
 
+\\\\\textbf{MATLAB Code:}
 
 % Define custom settings for lstlisting
 \lstset{
-    language=C++,                         % Set the language to C++
-    backgroundcolor=\color{lightgray},    % Set background color
-    frame=single,                         % Add a frame around the code
-    basicstyle=\ttfamily\footnotesize,    % Use a smaller font size (footnotesize)
-    keywordstyle=\color{blue},            % Color keywords
-    commentstyle=\color[RGB]{0,128,0},    % Dark green color for comments
-    caption=Arduino C++ Code for Sensor Application \& Sensor Characterization,             % Caption for the code
-    emph={setup, loop},                   % Specify function names to be bold
-    emphstyle=\bfseries,                  % Style for emphasized text (function names)
-    breaklines=true,                      % Enable line breaking
-    breakatwhitespace=true,               % Allow breaking at whitespace
+    language=Matlab,                     % Set the language to MATLAB
+    backgroundcolor=\color{lightgray},   % Set background color for the code box
+    frame=single,                        % Add a frame around the code
+    basicstyle=\ttfamily,                % Use a typewriter font
+    keywordstyle=\color{blue},           % Set keyword color
+    commentstyle=\color[RGB]{0,128,0},   % Dark green color for comments
+    caption=MATLAB Code,                 % Caption for the code
+    breaklines=true,                     % Enable line breaking
+    breakatwhitespace=true,              % Allow line breaks at whitespace
+    showspaces=false,                    % Do not show spaces as symbols
 }
 
-\section{Code Snippets and Explanations}
-
-This section presents key snippets from the Arduino code, explaining their significance and purpose in the application.
-
-\subsection{Ultrasonic Sensor Triggering and Distance Calculation}
-
-The following code snippet triggers the ultrasonic sensor to emit a sound wave and measures the time of flight (TOF) for the echo to return. It then calculates the distance to the obstacle using the speed of sound.
 
 \begin{lstlisting}
-// Function to read distance from ultrasonic sensor
-float readSensor(){
-    // Generate trig pulse to start
-    digitalWrite(trigPin, LOW);          // Set trigger pin low
-    delayMicroseconds(2);                // Wait 2 microseconds
-    digitalWrite(trigPin, HIGH);         // Set trigger pin high to send pulse
-    delayMicroseconds(10);               // Hold pulse for 10 microseconds
-    digitalWrite(trigPin, LOW);          // Stop pulse
+% Initialize connection to Arduino
+a = arduino('COM3', 'Leonardo');  % Replace 'COM3' with your actual port
+triggerPin = 'D9';
+echoPin = 'D10';
+
+% Define known distances (in meters)
+distances = [0.10, 0.20, 0.30, 0.40, 0.50, 0.60, 0.70, 0.80, 0.90, 1.0];  % Known distances
+
+% Initialize an empty array to store time values
+time_values = zeros(1, length(distances));
+
+% Loop through the number of measurements (one for each distance)
+for i = 1:length(distances)
+    disp(['Place the object at ' num2str(distances(i)) ' meters']);
+    pause(10);  % Give time to adjust the object
     
-    // Measure Time of Flight (TOF)
-    t = pulseIn(echoPin, HIGH);          // Capture the duration for echo return
+    % Take measurement from the HC-SR04 sensor
+    time_taken = readUltrasonicDistance(a, triggerPin, echoPin);  % Time taken (in seconds)
     
-    // Calculate the distance using the speed of sound in air (343 m/s)
-    d = scale * t * 343 / 2;             // Distance = (TOF * speed of sound) / 2
+    % Store the recorded time
+    time_values(i) = time_taken;
     
-    // Display the calculated distance on serial monitor
-    Serial.print("Distance: ");
-    Serial.print(d);
-    Serial.println(" cm");
+    % Display the recorded time for user feedback
+    disp(['Time recorded for ' num2str(distances(i))'meters: ' num2str(time_taken) 'seconds']);
     
-    return d;                            // Return the measured distance
-}
+    pause(1);  % Pause before the next measurement
+end
+
+% Calculate speed of sound for each distance using v = 2 * d / t
+speed_of_sound_values = (2 .* distances) ./ time_values;
+
+% Calculate the mean speed of sound
+mean_speed_of_sound = mean(speed_of_sound_values);
+
+% Display results
+disp('Recorded time values (in seconds):');
+disp(time_values);
+
+disp('Speed of sound values for each distance (in m/s):');
+disp(speed_of_sound_values);
+
+disp('Mean speed of sound (in m/s):');
+disp(mean_speed_of_sound);
+
+% Clean up the connection
+clear a;
 \end{lstlisting}
-
-\textbf{Explanation:}  
-This function sends a pulse through the ultrasonic sensor using the `trigPin` and measures how long it takes for the echo to return via `echoPin`. The time measured (\texttt{t}) is then used to calculate the distance \(d\) based on the formula:
-\[
-\text{Distance} = \frac{\Delta t \times 343}{2}
-\]
-where \(343 \, \text{m/s}\) is the speed of sound in air at room temperature. The result is printed on the serial monitor for debugging purposes.
-
-\subsection{Servo Sweeping Mechanism and Distance Averaging}
-
-The code snippet below sweeps the servo motor across a specified range of angles, takes multiple readings from the ultrasonic sensor, and computes the average distance for better accuracy.
-
-\begin{lstlisting}
-// Sweep the servo and measure distance at each position
-for (int angle = 50; angle <= 70; angle += 6) {
-    servoX.write(angle);                 // Move the servo to the current angle
-    delayMicroseconds(200);              // Delay to allow the servo to move
-    
-    // Read the distance twice to reduce noise
-    float dist1 = readSensor();          // First distance reading
-    delayMicroseconds(10);               // Short delay between readings
-    float dist2 = readSensor();          // Second distance reading
-    
-    // Compute the average distance
-    float dist = (dist1 + dist2) / 2;    // Average the two distance readings
-    
-    // Check if obstacle is within the defined threshold
-    checkObstacleThreshold(dist);        // Function to warn if within threshold
-}
-\end{lstlisting}
-
-\textbf{Explanation:}  
-This loop moves the servo motor from 50 degrees to 70 degrees in increments of 6 degrees. At each position, the ultrasonic sensor measures the distance twice, and the average of the two readings is computed to minimize measurement noise. This helps ensure more accurate detection of obstacles. The distance is then checked against the obstacle threshold (60 cm), and if the obstacle is too close, a warning (LED) is triggered.
-
-\subsection{Obstacle Detection and LED Warning}
-
-The code snippet checks whether the measured distance is below the defined threshold and activates a warning LED if an obstacle is detected.
-
-\begin{lstlisting}
-// Function to check if the obstacle is within threshold distance
-void checkObstacleThreshold(float dist) {
-    if (dist < obstacleThreshold && dist > 0) {  // If distance is valid and below threshold
-        digitalWrite(warningLedPin, HIGH);       // Turn on the warning LED
-    } else {
-        digitalWrite(warningLedPin, LOW);        // Turn off the warning LED
-    }
-}
-\end{lstlisting}
-
-\textbf{Explanation:}  
-This function compares the measured distance \texttt{dist} to the predefined threshold value \texttt{obstacleThreshold} (60 cm). If the object is detected within this range and the distance is valid (greater than 0), the warning LED connected to \texttt{warningLedPin} is turned on. If the object is farther away or no valid reading is detected, the LED remains off.
-
-{\let\clearpage\relax \chapter{Testing and Results}}
-
-
-\section{Overview}
-This section aims to characterize the ultrasonic sensor by examining its performance under various conditions, including its deadband in close proximity, maximum measurable distance, and accuracy influenced by environmental temperature and humidity. To ensure measurement accuracy, the actual speed of sound, affected by these environmental factors, is determined and used for calibration.\\\\Additionally, a test case regarding firefighting application with an ultrasonic sensor is done to evaluate the performance of the sensor in thick smoke conditions.\\\\The test cases are summarized in the follow keypoints:
-
-
-\begin{itemize}
-    \item Comparison between expected distances and measured distance (accuracy)
-    \item Testing the minimum detectable distance (close proximity)
-    \item Testing the maximum detectable distance (range limit)
-    \item Evaluation of object sensing in conditions with smoke (Firefighting application)
-\end{itemize}
-
-    
-\section{Testing Setup}
-Describe the environment used for testing:
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.35\linewidth]{Test room.jpg}
-    \caption{Testing room}
-    \label{fig:enter-label}
-\end{figure}
-\begin{itemize}
-    \item \textbf{Location:} Living room, flat surface, 9 metres length and 5 metres wide of space for testing. 
-    \item \textbf{Challenges:} 
-    \begin{itemize}
-        \item \textbf{Sensor Accuracy:} Initial distance measurements showed slight discrepancies, primarily due to variations in environmental temperature and humidity. These factors affected the speed of sound, requiring adjustments on the speed of sound in code to achieve accurate readings.
-    \end{itemize}
-\end{itemize}
-
-
-\section{Results}
-\subsection{Sensor Characterization: Accuracy}
-A scatter plot with a trend line was used to determine the speed of sound under the test room conditions, yielding \textbf{a value of 326 m/s at 30°C.}
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.5\linewidth]{Trendgraph_ultrasonicreadings.png}
-    \caption{Ultrasonic Sensor Accuracy Trend}
-    \label{fig:trend-graph}
-\end{figure}
-
-\subsection{Sensor Characterization: Close Proximity}
-The sensor detects objects at a minimum distance of \textbf{1.5 cm}. Distances below \textbf{1 cm} fall within its "dead band," producing errors like "985 cm" and "900 cm." Although the HC-SR04's specified dead band is \textbf{2 cm}, this variation may be due to manufacturing quality. However, in the firefighting scenario, close proximity of 2 cm or less is not an issue, as the threshold is set at \textbf{60 cm}, providing sufficient room for the firefighter to maneuver.
-
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.25\linewidth]{maximumrange.jpg}
-    \caption{Maximum range: 414cm}
-    \label{fig:enter-label}
-\end{figure}
-
-\subsection{Sensor Characterization: Maximum Range}
-The maximum detection range was found to be \textbf{414 cm}, beyond which the sensor fails to detect the marker and may pick up other objects. In the firefighting application, this range is sufficient, as the alert threshold is set at \textbf{60 cm}, allowing the firefighter ample room to avoid obstacles.
-
-
-\subsection{Sensor Application: Firefighting Scenario}
-
-\begin{figure}[H]
-    \centering
-    \begin{subfigure}[b]{0.3\linewidth}
-        \centering
-       \raisebox{0.5cm}{\includegraphics[width=\linewidth]{Threshold Test 0.png}}
-        \caption{Outside detection range.}
-        \label{fig:safe-zone}
-    \end{subfigure}
-    \hfill
-    \begin{subfigure}[b]{0.3\linewidth}
-        \centering
-        \includegraphics[width=\linewidth]{Threshold Test 1.png}
-        \caption{LED triggered within threshold.}
-        \label{fig:threshold-warning}
-    \end{subfigure}
-    \hfill
-    \begin{subfigure}[b]{0.3\linewidth}
-        \centering
-        \includegraphics[width=\linewidth]{Threshold Test 3.png}
-        \caption{Outside field of view range.}
-        \label{fig:within-threshold}
-    \end{subfigure}
-    
-    \caption{Various states of obstacle detection using the ultrasonic sensor helmet system.}
-    \label{fig:combined-images}
-\end{figure}
-
-
-
-\subsubsection{Threshold Test}
-The sensor's detection threshold was set at \textbf{60 cm} to provide adequate warning and maneuvering space for the firefighter. During testing, the sensor reliably detected obstacles within this range, triggering the red warning LED to switch ON.
-\begin{figure}[H]
-    \centering
-    \begin{subfigure}[b]{0.45\linewidth}
-        \centering
-        \includegraphics[height=5cm]{Helmet with smoke.PNG}  % Adjust height as necessary
-        \caption{LED ON during smoke exposure.}
-        \label{fig:led-on}
-    \end{subfigure}
-    \hfill
-    \begin{subfigure}[b]{0.45\linewidth}
-        \centering
-        \includegraphics[height=5cm]{Smoke condition test.png}  % Adjust height as necessary
-        \caption{System when worn during smoke test.}
-        \label{fig:smoke-test}
-    \end{subfigure}
-    
-    \caption{Alternate views of LED activation and the system during smoke test.}
-    \label{fig:led-smoke-comparison}
-\end{figure}
-\subsubsection{Smoke Condition Test}
-In a smoke-filled box simulating firefighting conditions, the \textbf{sensor successfully detected obstacles}, demonstrating its potential for accurate detection in low-visibility environments. When obstacles were detected within the 60 cm threshold, the red warning LED was activated.These tests characterize the ultrasonic sensor's capabilities, guiding its effective application for obstacle detection in conditions where LIDAR and camera is less effective.
-
-
-
-
-
-{\let\clearpage\relax \chapter{Conclusion}}
-
-\vspace{-1.5em} % Adjust this value to control the spacing
-\section{Project Summary}
-
-This project demonstrated the effectiveness of ultrasonic sensors for obstacle detection in smoke-filled environments. Reliable distance measurements were obtained across varying conditions, with consistent accuracy. The system provided real-time visual feedback through an LED and utilized a servomotor for automated panning, expanding the sensor's field of view. These results highlight the potential of ultrasonic sensors in low-visibility scenarios and lay the groundwork for future improvements.
-
-
-
-
-
-\section{Challenges}
-
-During the project, several challenges were encountered:
-
-\begin{itemize}
-\item \textbf{Speed of Sound Variations}: The sensor readings \textbf{showed deviations of ±2 cm and more}, primarily due to environmental factors like temperature and humidity affecting the speed of sound.
-
-\textbf{\textit{Solution:}} To improve accuracy, the actual speed of sound was calculated by determining the slope from the relationship between measured and actual readings, accounting for the specific temperature and humidity conditions in each environment.
-
-    
-\item \textbf{Field of View (FOV) and Accuracy Tradeoff}: The initial wide FOV was unnecessary, as it included areas outside the user's direct path (his sides), leading to false positives. This caused the detection system to misidentify obstacles, resulting in blinking of the warning system.
-
-\textbf{\textit{Solution:}} The FOV was narrowed to focus solely on the path in front of the user, \textbf{reducing false positives} and improving overall detection accuracy.
-    
-\end{itemize}
-
-
-\section{Future Improvements}
-
-\begin{itemize}
-
-    \item \textbf{Automatic Speed of Sound Adjustment:} Integrating temperature and humidity sensors to automatically tune the speed of sound variable in real-time, ensuring accurate distance measurements regardless of environmental conditions.
-    
-    \item \textbf{Sensor Fusion for Enhanced Robotic Applications:} With the current sensors on robotic platforms, the addition of an ultrasonic sensor would be advantageous for navigating conditions where LiDAR and cameras are less effective. Such as foggy, smoky or dusty environments. This is particularly ideal for unmanned rescue missions, where navigating through hazardous conditions is crucial to fulfill mission objectives.
-\end{itemize}
-
-
-\appendix
-\chapter{Appendix}
-\section{Presentation Slides}
-Add any additional diagrams or illustrations that may help explain the system.
-
-\section{Additional Code}
-Include any supplementary code, if applicable (e.g., code for a servo motor or buzzer).
 
 \end{document}
