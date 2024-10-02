@@ -1,0 +1,57 @@
+#include "FastIMU.h"
+#include <Wire.h>
+
+MPU6500 mpu;  // Define mpu object from class MPU6500
+AccelData accelOut;
+GyroData gyroOut;
+calData cal = { 0 };  // Calibration data
+
+void setup() {
+  cal.valid = false;  // Mark calibration as invalid initially
+  Serial.begin(9600);
+  Wire.begin();
+  Wire.setClock(400000);  // Set the I2C clock to 400 kHz
+  delay(2000);
+
+  // Initialize MPU6500 with the specified address
+  int err = mpu.init(cal, 0x68);
+  if (err != 0) {
+    Serial.print("Error initializing IMU: ");
+    Serial.println(err);
+    while (true) {
+      ;  // Stop execution if initialization fails
+    }
+  } else {
+    Serial.println("MPU6500 Initialized");
+  }
+
+  // Perform calibration (optional)
+  Serial.println("Performing Calibration...");
+  mpu.calibrateAccelGyro(&cal);
+  Serial.println("Calibration done!");
+
+  // Reinitialize with the new calibration data
+  mpu.init(cal, 0x68);
+}
+
+void loop() {
+  delay(100);
+  mpu.update();
+
+  // Get gyro and acceleration data
+  mpu.getGyro(&gyroOut);
+  mpu.getAccel(&accelOut);
+
+  // Print gyro data
+  Serial.print("Gyro X: ");
+  Serial.println(gyroOut.gyroX);
+  Serial.print("Gyro Y: ");
+  Serial.println(gyroOut.gyroY);
+
+  // Print acceleration data
+  Serial.println("Acceleration: ");
+  Serial.print("Accel X: ");
+  Serial.println(accelOut.accelX);
+  Serial.print("Accel Y: ");
+  Serial.println(accelOut.accelY);
+}
