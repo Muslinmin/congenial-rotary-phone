@@ -50,9 +50,27 @@ def draw():
     global rquad
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
 
+    # Draw the sky background with a gradient
+    glLoadIdentity()
+    glDisable(GL_DEPTH_TEST)  # Disable depth testing for the background
+    glBegin(GL_QUADS)
+    # Top of the sky (light blue)
+    glColor3f(0.53, 0.81, 0.92)  # Light sky blue
+    glVertex3f(-1.0, 1.0, -1.0)  # Closer to the camera
+    glVertex3f(1.0, 1.0, -1.0)
+    
+    # Bottom of the sky (darker blue)
+    glColor3f(0.0, 0.0, 0.8)  # Dark blue
+    glVertex3f(1.0, -1.0, -1.0)
+    glVertex3f(-1.0, -1.0, -1.0)
+    glEnd()
+    glEnable(GL_DEPTH_TEST)  # Re-enable depth testing
+
+    # Set up the scene
     glLoadIdentity()
     glTranslatef(25, -100.0, -450.0)
-    glRotatef(180, 0, 1, 0) 
+    glRotatef(180, 0, 1, 0)
+
     osd_text = "pitch: " + str("{0:.2f}".format(ay)) + ", roll: " + str("{0:.2f}".format(ax))
 
     if yaw_mode:
@@ -71,6 +89,7 @@ def draw():
     # Draw the loaded model
     if model:
         model.render()  # Call the render method of the OBJ loader
+
 
 def read_data():
     global ax, ay, az
