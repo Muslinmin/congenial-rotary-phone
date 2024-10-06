@@ -6,6 +6,7 @@ import pygame
 from pygame.locals import *
 import serial
 from objloader import OBJ  # Import the OBJ loader
+import math
 
 # ser = serial.Serial('/dev/tty.usbserial', 38400, timeout=1)
 ser = serial.Serial('COM5', 9600, timeout=1)
@@ -46,6 +47,66 @@ def drawText(position, textString):
     glRasterPos3d(*position)
     glDrawPixels(textSurface.get_width(), textSurface.get_height(), GL_RGBA, GL_UNSIGNED_BYTE, textData)
 
+def draw_circle(x, y, radius, segments=100):
+    """Draw a circle using OpenGL primitives."""
+    glBegin(GL_LINE_LOOP)
+    for i in range(segments):
+        theta = 2.0 * math.pi * i / segments
+        dx = radius * math.cos(theta)
+        dy = radius * math.sin(theta)
+        glVertex2f(x + dx, y + dy)
+    glEnd()
+
+def draw_needle(x, y, angle, length):
+    """Draw a needle for the meter."""
+    glPushMatrix()
+    glTranslatef(x, y, 0)
+    glRotatef(angle, 0, 0, 1)
+    glBegin(GL_LINES)
+    glVertex2f(0, 0)
+    glVertex2f(0, length)
+    glEnd()
+    glPopMatrix()
+
+def draw_dashboard():
+    # Switch to orthographic projection for the 2D dashboard
+    glMatrixMode(GL_PROJECTION)
+    glPushMatrix()
+    glLoadIdentity()
+    gluOrtho2D(-1, 1, -1, 1)  # Orthographic view covering the whole window
+    glMatrixMode(GL_MODELVIEW)
+    glPushMatrix()
+    glLoadIdentity()
+
+    # Draw the dashboard background
+    glColor3f(0.1, 0.1, 0.1)  # Dark grey for the dashboard
+    glBegin(GL_QUADS)
+    glVertex2f(-1.0, -0.8)
+    glVertex2f(1.0, -0.8)
+    glVertex2f(1.0, -1.0)
+    glVertex2f(-1.0, -1.0)
+    glEnd()
+
+    # Speed meter
+    glColor3f(1.0, 1.0, 1.0)  # White for the meter outline
+    draw_circle(-0.5, -0.9, 0.1)  # Draw the speed meter circle
+    draw_needle(-0.5, -0.9, 45, 0.1)  # Example needle position for speed
+
+    # Engine meter
+    glColor3f(1.0, 1.0, 1.0)  # White for the meter outline
+    draw_circle(0.5, -0.9, 0.1)  # Draw the engine meter circle
+    draw_needle(0.5, -0.9, 90, 0.1)  # Example needle position for engine
+
+    # Add labels for the meters
+    drawText((-0.55, -0.95, 0), "Speed")
+    drawText((0.45, -0.95, 0), "Engine")
+
+    # Restore the previous projection and modelview matrices
+    glMatrixMode(GL_PROJECTION)
+    glPopMatrix()
+    glMatrixMode(GL_MODELVIEW)
+    glPopMatrix()
+
 def draw():
     global rquad
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
@@ -54,15 +115,25 @@ def draw():
     glLoadIdentity()
     glDisable(GL_DEPTH_TEST)  # Disable depth testing for the background
     glBegin(GL_QUADS)
+
     # Top of the sky (light blue)
-    glColor3f(0.53, 0.81, 0.92)  # Light sky blue
-    glVertex3f(-1.0, 1.0, -1.0)  # Closer to the camera
+    glColor3f(0.4, 0.7, 0.9)  # Adjust these values for a lighter shade of blue
+    glVertex3f(-1.0, 1.0, -1.0)
     glVertex3f(1.0, 1.0, -1.0)
-    
+
     # Bottom of the sky (darker blue)
-    glColor3f(0.0, 0.0, 0.8)  # Dark blue
-    glVertex3f(1.0, -1.0, -1.0)
-    glVertex3f(-1.0, -1.0, -1.0)
+    glColor3f(0.0, 0.0, 0.5)  # Adjust these values for a darker blue
+    glVertex3f(1.0, -0.3, -1.0)  # Adjusted y-coordinate to match ground height
+    glVertex3f(-1.0, -0.3, -1.0)
+    glEnd()
+
+    # Draw the ground
+    glBegin(GL_QUADS)
+    glColor3f(0.55, 0.27, 0.07)  # Brown color for the ground
+    glVertex3f(-1.0, -0.3, -1.0)  # Top-left corner (Adjusted y-coordinate to -0.3)
+    glVertex3f(1.0, -0.3, -1.0)  # Top-right corner (Adjusted y-coordinate to -0.3)
+    glVertex3f(1.0, -1.0, -1.0)  # Bottom-right corner
+    glVertex3f(-1.0, -1.0, -1.0)  # Bottom-left corner
     glEnd()
     glEnable(GL_DEPTH_TEST)  # Re-enable depth testing
 
@@ -90,6 +161,8 @@ def draw():
     if model:
         model.render()  # Call the render method of the OBJ loader
 
+    # Draw the dashboard
+    #draw_dashboard()
 
 def read_data():
     global ax, ay, az
