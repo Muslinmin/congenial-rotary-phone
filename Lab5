@@ -52,23 +52,46 @@ void transmitToPythonSimulationApp(){
     }
 }
 
-void transmitToMatLab() {
-  // Transmit the start header "111"
-  Serial.print("111");
+// void transmitToMatLab() {
+//   // Transmit the start header "111"
+//   Serial.print("111");
 
-  // Transmit the accelerometer data
-  Serial.print("AccX="); Serial.print(accelOut.accelX); Serial.print(", ");
-  Serial.print("AccY="); Serial.print(accelOut.accelY); Serial.print(", ");
-  Serial.print("AccZ="); Serial.print(accelOut.accelZ); Serial.print(", ");
+//   // Transmit the accelerometer data
+//   Serial.print("AccX="); Serial.print(accelOut.accelX); Serial.print(", ");
+//   Serial.print("AccY="); Serial.print(accelOut.accelY); Serial.print(", ");
+//   Serial.print("AccZ="); Serial.print(accelOut.accelZ); Serial.print(", ");
   
-  // Transmit the gyroscope data
-  Serial.print("GyrX="); Serial.print(gyroOut.gyroX); Serial.print(", ");
-  Serial.print("GyrY="); Serial.print(gyroOut.gyroY); Serial.print(", ");
-  Serial.print("GyrZ="); Serial.print(gyroOut.gyroZ);
+//   // Transmit the gyroscope data
+//   Serial.print("GyrX="); Serial.print(gyroOut.gyroX); Serial.print(", ");
+//   Serial.print("GyrY="); Serial.print(gyroOut.gyroY); Serial.print(", ");
+//   Serial.print("GyrZ="); Serial.print(gyroOut.gyroZ);
   
-  // Transmit the end header "FFF"
-  Serial.println("FFF");
+//   // Transmit the end header "FFF"
+//   Serial.println("FFF");
+// }
+
+void transmitToMatLab() {
+    // Start header: send '111'
+    Serial.print("111");
+
+    // Transmit the IMU data as comma-separated values
+    Serial.print(accelOut.accelX, 2);  // X acceleration with 2 decimal places
+    Serial.print(",");
+    Serial.print(accelOut.accelY, 2);  // Y acceleration with 2 decimal places
+    Serial.print(",");
+    Serial.print(accelOut.accelZ, 2);  // Z acceleration with 2 decimal places
+    Serial.print(",");
+    Serial.print(gyroOut.gyroX, 2);  // X gyroscope data
+    Serial.print(",");
+    Serial.print(gyroOut.gyroY, 2);  // Y gyroscope data
+    Serial.print(",");
+    Serial.print(gyroOut.gyroZ, 2);  // Z gyroscope data
+    Serial.print(",");
+
+    // End header: send 'FFF'
+    Serial.print("FFF");
 }
+
 
 void loop() {
     mpu.update();
