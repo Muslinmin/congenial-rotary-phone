@@ -17,6 +17,7 @@ yaw_mode = False
 # Load the OBJ model (global variable)
 model = None
 
+
 def resize(width, height):
     if height == 0:
         height = 1
@@ -27,6 +28,7 @@ def resize(width, height):
     glMatrixMode(GL_MODELVIEW)
     glLoadIdentity()
 
+
 def init():
     global model
     glShadeModel(GL_SMOOTH)
@@ -35,10 +37,11 @@ def init():
     glEnable(GL_DEPTH_TEST)
     glDepthFunc(GL_LEQUAL)
     glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST)
-    
+
     # Load the OBJ model
     model = OBJ('./model/plane.obj')  # Adjust the path to your model
     model.generate()
+
 
 def drawText(position, textString):
     font = pygame.font.SysFont("Courier", 18, True)
@@ -46,6 +49,7 @@ def drawText(position, textString):
     textData = pygame.image.tostring(textSurface, "RGBA", True)
     glRasterPos3d(*position)
     glDrawPixels(textSurface.get_width(), textSurface.get_height(), GL_RGBA, GL_UNSIGNED_BYTE, textData)
+
 
 def draw_circle(x, y, radius, segments=100):
     """Draw a circle using OpenGL primitives."""
@@ -57,6 +61,7 @@ def draw_circle(x, y, radius, segments=100):
         glVertex2f(x + dx, y + dy)
     glEnd()
 
+
 def draw_needle(x, y, angle, length):
     """Draw a needle for the meter."""
     glPushMatrix()
@@ -67,6 +72,7 @@ def draw_needle(x, y, angle, length):
     glVertex2f(0, length)
     glEnd()
     glPopMatrix()
+
 
 def draw_dashboard():
     # Switch to orthographic projection for the 2D dashboard
@@ -106,6 +112,7 @@ def draw_dashboard():
     glPopMatrix()
     glMatrixMode(GL_MODELVIEW)
     glPopMatrix()
+
 
 def draw():
     global rquad
@@ -149,20 +156,19 @@ def draw():
     else:
         osd_line = osd_text
 
-    drawText((-2, -2, 2), osd_line)
+    drawText((-2, 50, 2), osd_line)
 
     # Apply IMU rotations
     if yaw_mode:
         glRotatef(az, 0.0, 1.0, 0.0)  # Yaw, rotate around y-axis
-    glRotatef(ay, 1.0, 0.0, 0.0)  # Pitch, rotate around x-axis
+    glRotatef(1 * ay, 1.0, 0.0, 0.0)  # Pitch, rotate around x-axis
     glRotatef(-1 * ax, 0.0, 0.0, 1.0)  # Roll, rotate around z-axis
 
     # Draw the loaded model
     if model:
         model.render()  # Call the render method of the OBJ loader
 
-    # Draw the dashboard
-    #draw_dashboard()
+
 
 def read_data():
     global ax, ay, az
@@ -178,6 +184,7 @@ def read_data():
         ay = float(angles[1])
         az = float(angles[2])
         line_done = 1
+
 
 def main():
     global yaw_mode
@@ -207,6 +214,7 @@ def main():
 
     print("fps: %d" % ((frames * 1000) / (pygame.time.get_ticks() - ticks)))
     ser.close()
+
 
 if __name__ == '__main__':
     main()
