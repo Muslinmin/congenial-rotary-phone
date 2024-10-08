@@ -40,9 +40,9 @@ public:
   float P[2][2];   // Error covariance matrix
 
   Kalman() {
-    Q_angle = 0.001f;
+    Q_angle = 0.003f; // 0.001
     Q_bias = 0.003f;
-    R_measure = 0.03f;
+    R_measure = 0.03f; // base value was 0.03f
 
     angle = 0.0f;
     bias = 0.0f;
@@ -85,7 +85,18 @@ public:
     return angle;
   }
 };
-
+void plotFilteredVsAccel(float filteredPitch, float accelPitch) {
+    // Send the filtered pitch and raw accelerometer pitch values separated by tabs
+    Serial.print(filteredPitch);
+    Serial.print("\t");
+    Serial.println(accelPitch);  // End the line with a newline character
+}
+void plotPitchRoll(float pitchT, float rollT) {
+    // Send the pitch and roll values separated by a tab
+    Serial.print(pitchT);
+    Serial.print("\t");  // Use tab to separate values
+    Serial.println(rollT);  // Use newline to mark the end of the data
+}
 void transmitToMatLab(float pitchT, float rollT) {
     // Start header: send '111'
     Serial.print("111");
@@ -126,7 +137,7 @@ void setup() {
       ;  // Stop execution if initialization fails
     }
   } else {
-    Serial.println("MPU6500 Initialized");
+    // Serial.println("MPU6500 Initialized");
   }
 
   // Perform calibration
@@ -142,48 +153,64 @@ void setup() {
   elevatorRight.attach(elevatorRightPin);
 }
 
+void transmitToPythonSimulationApp() {
+  // Serial communication routine
+  if (Serial.available()) {
+    char rx_char = Serial.read();
+    if (rx_char == '.') {
+      Serial.print(roll, 2);
+      Serial.print(", ");
+      Serial.print(pitch, 2);
+      Serial.print(", ");
+      Serial.println(yaw, 2); // Transmit yaw if needed
+    }
+  }
+}
+void printAileronAndElevatorResults(int ailLeft, int ailRight, int eleLeft, int eleRight){
+    Serial.print("Aileron Left: ");
+    Serial.println(ailLeft);
+    Serial.print("Aileron Right: ");
+    Serial.println(ailRight);
+    
+    Serial.print("Elevator Left: ");
+    Serial.println(eleLeft);
+    Serial.print("Elevator Right: ");
+    Serial.println(eleRight);
+}
 void servoControl(float pit, float rol) {
   // Convert the float parameters to int
   int pitchInt = static_cast<int>(pit);
   int rollInt = static_cast<int>(rol);
 
   // Calculate new servo angles
-  int aileronLeftAngle = 90 + rollInt;
-  int aileronRightAngle = 90 - rollInt;
-  int elevatorLeftAngle = 90 + pitchInt;
-  int elevatorRightAngle = 90 + pitchInt;
+  int aileronLeftAngle = constrain(90 - rollInt - 30, 10, 170);
+  int aileronRightAngle = constrain(90 - rollInt - 30, 10, 170);
+  int elevatorLeftAngle = constrain(90 + pitchInt + 15, 10, 170);
+  int elevatorRightAngle = constrain(90 - pitchInt + 15, 10, 170);
 
   // Check for changes beyond 5 degrees for each servo
   if (abs(aileronLeftAngle - prevAileronLeftAngle) >= 1) {
-    // aileronLeft.write(aileronLeftAngle);
-    // aileronRight.write(aileronLeftAngle); // emulate
+    aileronLeft.write(aileronLeftAngle);
     prevAileronLeftAngle = aileronLeftAngle;  // Update previous angle
-    // Serial.print("Aileron Left Angle: ");
-    // Serial.println(aileronLeftAngle);
   }
 
   if (abs(aileronRightAngle - prevAileronRightAngle) >= 1) {
-    // aileronRight.write(aileronRightAngle);
+    aileronRight.write(aileronRightAngle);
     prevAileronRightAngle = aileronRightAngle;  // Update previous angle
-    Serial.print("Aileron Right Angle: ");
-    Serial.println(aileronRightAngle);
   }
 
   if (abs(elevatorLeftAngle - prevElevatorLeftAngle) >= 1) {
-    // elevatorLeft.write(elevatorLeftAngle);
-    // aileronRight.write(elevatorLeftAngle); // emulate
+    elevatorLeft.write(elevatorLeftAngle);
     prevElevatorLeftAngle = elevatorLeftAngle;  // Update previous angle
-    // Serial.print("Elevator Left Angle: ");
-    // Serial.println(elevatorLeftAngle);
   }
 
   if (abs(elevatorRightAngle - prevElevatorRightAngle) >= 1) {
-    // elevatorRight.write(elevatorRightAngle);
+    elevatorRight.write(elevatorRightAngle);
     prevElevatorRightAngle = elevatorRightAngle;  // Update previous angle
-    // Serial.print("Elevator Right Angle: ");
-    // Serial.println(elevatorRightAngle);
   }
+  // printAileronAndElevatorResults(aileronLeftAngle, aileronRightAngle, elevatorLeftAngle, elevatorRightAngle);
 }
+
 
 Kalman kalmanPitch;
 Kalman kalmanRoll;
@@ -207,8 +234,14 @@ void loop() {
   roll = kalmanRoll.getAngle(accelRoll, gyroOut.gyroY, dt);
 
   // Control servos based on pitch and roll
-  // servoControl(pitch, roll);
-  transmitToMatLab(pitch, roll);
-  delay(1);  // Add some delay for stability
+  servoControl(pitch, roll);
+  // Serial.print("Roll: ");
+  // Serial.println(roll + 90);
+  // Serial.print("Roll: ");
+  // Serial.println(roll);
+  // plotFilteredVsAccel(pitch, accelPitch);
+  transmitToPythonSimulationApp();
+  // transmitToMatLab(pitch, roll);
+  delay(40);  // Add some delay for stability
 }
 
