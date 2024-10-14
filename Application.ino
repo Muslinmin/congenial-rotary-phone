@@ -41,7 +41,7 @@ public:
 
   Kalman() {
     Q_angle = 0.003f; // 0.001
-    Q_bias = 0.003f;
+    Q_bias = 0.0034243; // 0.003f
     R_measure = 0.03f; // base value was 0.03f
 
     angle = 0.0f;
@@ -56,8 +56,8 @@ public:
 
   float getAngle(float newAngle, float newRate, float dt) {
     // Predict
-    rate = newRate - bias;
-    angle += dt * rate;
+    rate = newRate - bias; // new Angular velocity - bias
+    angle += dt * rate;    // add the new angle to the previous angle
 
     P[0][0] += dt * (dt * P[1][1] - P[0][1] - P[1][0] + Q_angle);
     P[0][1] -= dt * P[1][1];
@@ -166,6 +166,15 @@ void transmitToPythonSimulationApp() {
     }
   }
 }
+void plotComparison(float accelPitch, float gyroX, float kalmanPitchValue){
+      // Print the accelerometer pitch, gyroscope X value, and filtered Kalman pitch in a tab-separated format
+    Serial.print(accelPitch);
+    Serial.print("\t");
+    Serial.print(gyroX);
+    Serial.print("\t");
+    Serial.println(kalmanPitchValue);  // End the line with a newline character
+}
+
 void printAileronAndElevatorResults(int ailLeft, int ailRight, int eleLeft, int eleRight){
     Serial.print("Aileron Left: ");
     Serial.println(ailLeft);
@@ -234,14 +243,15 @@ void loop() {
   roll = kalmanRoll.getAngle(accelRoll, gyroOut.gyroY, dt);
 
   // Control servos based on pitch and roll
-  servoControl(pitch, roll);
+  // servoControl(pitch, roll);
   // Serial.print("Roll: ");
   // Serial.println(roll + 90);
   // Serial.print("Roll: ");
   // Serial.println(roll);
   // plotFilteredVsAccel(pitch, accelPitch);
-  transmitToPythonSimulationApp();
-  // transmitToMatLab(pitch, roll);
+  // transmitToPythonSimulationApp();
+  transmitToMatLab(pitch, roll);
+  // plotComparison(accelPitch, gyroOut.gyroX, pitch);
   delay(40);  // Add some delay for stability
 }
 
