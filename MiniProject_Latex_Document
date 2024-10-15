@@ -7,56 +7,50 @@
 \usepackage[left=25mm,right=25mm,top=5mm,bottom=25mm,paper=a4paper]{geometry}
 \usepackage{hyperref}
 \usepackage{tikz}
-\usepackage{lscape}    % For landscape pages
+\usepackage{lscape}
 \usepackage{pdflscape}
 \usepackage{subcaption}
+\usepackage{pgfplots}
+\usepackage{caption}
+\usepackage{longtable}
+\usepackage{hyperref}
+\usepackage{titlesec}
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{framed}
 
-\usetikzlibrary{arrows, shapes, positioning, shapes.geometric}
-
-
+\usetikzlibrary{arrows, arrows.meta, shapes, positioning, shapes.geometric}
+\pgfplotsset{compat=1.18}
 
 \begin{document}
 
 % Title Page
-% \title{Ultrasonic Sensor Characterization and Its Application in Obstacle Detection for Firefighting Scenarios}
+\title{Automatic Flight Stabilization Control System}
+\author{
+  Stafford Ho Sheng Xian \\
+  Yugendren S/O Sooriya Moorthi \\
+  Reuben Low Yu Xiang \\
+  Mohammed Muslimin Bin Mohd Saleh \\
+  Caleb Lee Jia Le
+  \\
+  \\{[RSE4501]}
+}
 
-% \author{
-%   Stafford Ho Sheng Xian \\
-%   Yugendren S/O Sooriya Moorthi \\
-%   Reuben Low Yu Xiang \\
-%   Mohammed Muslimin Bin Mohd Saleh \\
-%   Caleb Lee Jia Le
-%   \\
-%   \\{[RSE4501]}
-% }
+\date{[15/10/24]}
+\maketitle
 
-% \date{[29/09/24]}
-% \maketitle
-\begin{center}
-    \Huge{Ultrasonic Sensor Characterization and Its Application in Obstacle Detection for Firefighting Scenarios}
-\end{center}
-\vspace{0cm}
-{\let\clearpage\relax \chapter{Introduction}}
-% \chapter{Introduction}
-\vspace{-1.5em}
+\chapter{Introduction}
 \section{Project Objectives}
-
 \begin{itemize}
-    \item Characterize the ultrasonic sensor by determining its speed of sound, minimum detectable distance, and maximum measurable range to achieve the desired accuracy.
-    \item Understand the operational principles of ultrasonic sensors to optimize their performance for obstacle detection.
-    \item Explore the application of ultrasonic sensors in scenarios, where systems like cameras and LiDAR fail because of smoke or dusty particles, demonstrating potential use of ultrasonic sensors
-    \begin{itemize}
-        \item Develop an obstacle-detection helmet for firefighters in thick smoke conditions common in firefighting scenarios        
-        \item Review the benefits of this application and explore how similar improvements can be applied to robotics navigation systems
-    \end{itemize}
+    \item Characterize the IMU by determining its sensitivity, minimum detectable movement, maximum measurable range and latency to achieve the desired accuracy.
+    \item Understand the operational principles of IMUs to optimize their performance for motion tracking and orientation sensing.
+    \item Improve the accuracy of orientation tracking in aircraft stabilization by combining PID control with Kalman filtering, minimizing the impact of sensor noise and disturbances.
 \end{itemize}
 
-
 \section{Background}
-    Ultrasonic sensors offer an advantage over LiDAR and cameras, especially in dusty or smoke-filled conditions. Unlike cameras, which rely on visibility and light, and LiDAR, which can be scattered by particles in the air during mapping (refer to Appendix A, Figure~\ref{fig:lidar_mapping_smoke}), ultrasonic sensors use sound waves. This allows them to detect obstacles in environments where visual and optical methods fail.\\This makes ultrasonic sensors a valuable tool for applications such as firefighting, where LiDAR and cameras may not be practical.\\\\Our project aims to integrates an ultrasonic sensor system mounted on firefighter helmets to assist navigating smoke-filled rooms. The helmet is equipped with an ultrasonic sensor that continuously scans the environment, detecting objects and obstacles in the firefighter's path. The system provides real-time feedback through an LED, which alerts the firefighter when an obstacle is within a critical range (defined as the "threshold distance"). This is especially crucial in environments where firefighters might be blinded by thick smoke.\\The following chapters showcase the results of multiple rounds of iteration and testing of our system across different scenarios and environmental conditions.
-   
-
-
+    An Inertial Measurement Unit (IMU) is a sensor that combines accelerometers, gyroscopes, and sometimes magnetometers to measure an object's specific force, angular rate, and orientation in 3D space. IMUs detect linear acceleration and angular velocity, allowing them to track changes in position and orientation over time.\\\\Originally developed for aerospace and military applications, IMUs are now widely used in robotics, smartphones, drones, and automotive systems. They play a crucial role in navigation, stabilization, and motion tracking, where accurate data about the device's movement is required. Modern IMUs, such as the MPU-6500, often include a Digital Motion Processor (DMP) to perform complex calculations internally, reducing the processing load on the main system and enhancing real-time performance.\\\\In this project, we aim to demonstrate the application of the MPU-6500 IMU for real-time orientation tracking of a prototype aircraft. When the aircraft deviates from level orientation, servomotors will dynamically adjust the tilt of the elevator and ailerons to restore stability. This process allows the aircraft to automatically correct its roll and pitch by modulating lift in response to simulated turbulence, effectively mimicking an aircraft stabilization system.
+    
 \chapter{Project Components}
 \section{Hardware Components}
 
@@ -66,929 +60,742 @@
 \end{itemize}
 
 \subsection{Sensors}
-%The project uses the following sensors:
 \begin{itemize}
-    \item \textbf{Ultrasonic Sensor HC-SR04 (Quantity: 1)}: The HC-SR04 works by emitting ultrasonic sound waves and measuring the time it takes for the sound waves to reflect off an object and return to the sensor. The distance from the object can be determined by calculating the time difference, making it a reliable sensor for obstacle detection.
+    \item \textbf{MPU-6500 (Quantity: 1)}: This 6-axis Inertial Measurement Unit (IMU) integrates a 3-axis gyroscope and a 3-axis accelerometer, allowing it to capture both angular velocity and linear acceleration along the X, Y, and Z axes. It includes a Digital Motion Processor (DMP) that processes raw sensor data internally, reducing the processing load on the main microcontroller.
 \end{itemize}
+
 
 \subsection{Actuators}
 \begin{itemize}
-    \item \textbf{TowerPro SG90 Mini Micro Digital Servo 9g (Quantity: 1)}: This component is used to enable automated panning movements by integrating it with an Arduino, allowing for programmed motion control within the system.
+    \item \textbf{TowerPro SG90 Mini Micro Digital Servo 9g (Quantity: 4)}: This component is used to enable automated panning movements by integrating it with an Arduino, allowing for programmed motion control within the system.
 \end{itemize}
 
 \section{Software Components}
 
 \subsection{Programming Language and Tools}
-The project utilizes \textbf{Arduino} for ultrasonic scanning and servo control routines, while \textbf{MATLAB} provides a visual representation of the user's 120-degree field of vision on a graph.
+The project utilizes \textbf{Arduino} for IMU measurements and servo control routines, while \textbf{MATLAB} provides a visual representation of the user's 120-degree field of vision on a graph.
 
 \subsection{Libraries Used}
 
 \begin{itemize}
-    \item \textbf{stdio.h}: A standard C library used to print debugging messages, such as ultrasonic readings, to the console.
+    \item \textbf{stdio.h}: A standard C library used to print debugging messages, such as IMU readings, to the console.
     \item \textbf{Servo.h}: A library used to control the servo motor by sending signals to set its position between 50 and 70 degrees, to emulate the user's field of vision.
 \end{itemize}
 
-
 \chapter{System Design and Architecture}
 \section{System Block Diagram}
-% Provide a block diagram illustrating the flow of information and components in the system; for example: sensor, actuator, microcontroller, and HMI (Human-Machine Interface).
-
-This block diagram describes generally the interactions between the components. The block diagram consists of several key components, including an Arduino Leonardo microcontroller, an ultrasonic sensor, a servo motor to pan and allow ultrasonic scanning, an LED to warn the user and MATLAB for visualization.
-
-% \begin{figure}[H]
-%     \centering
-%     \includegraphics[width=1\linewidth]{helmet block diagram.png}
-%     \caption{Block diagram of the obstacle detection helmet.}
-%     \label{fig:block diagram}
-% \end{figure}
-
 \begin{figure}[htbp]
+    \centering
     \begin{tikzpicture}[node distance=0.8cm, auto, scale=0.8, transform shape]
     
         % Nodes
-        \node (arduino) [draw, rectangle, minimum width=2.5cm, minimum height=6cm] {Arduino Leonardo};
-        \node (sensor) [draw, rectangle, left=of arduino, yshift=-1.5cm] {Ultrasonic Sensor};
-        \node (power) [draw, rectangle, left=of arduino, yshift=1.5cm] {Power Supply 5V};
-        \node (led) [draw, rectangle, right=of arduino, yshift=-1.5cm] {Red LED Warning Light};
-        \node (motor) [draw, rectangle, right=of arduino, yshift=1.5cm] {Servo Motor};
-        \node (clear) [draw, rectangle, right=of led, xshift=0cm, yshift=2.4cm] {Switches OFF as CLEAR TO PROCEED}; 
-        \node (obstacle) [draw, rectangle, below=of clear, yshift=-1cm] {Facing obstacle}; 
-        \node (on) [draw, rectangle, below=of obstacle] {Switches ON as warning};
-        \node (matlab) [draw, rectangle, above=of arduino] {MATLAB Software};
-        \node (human) [draw, rectangle, right=of obstacle] {Human};
-    
-        % Arrows
-        \draw[<->] (sensor.east) -- ++(0.3,0) |- (arduino.west |- sensor.east);
+        \node (matlab) [draw, dashed, rectangle, minimum width=2.5cm] {MATLAB};
+        \node (arduino) [draw, rectangle, below=of matlab, minimum width=2.5cm, minimum height=4cm] {Arduino Leonardo};
+        
+        \node (power) [draw, rectangle, left=of arduino, yshift=1.5cm, minimum width=2.5cm] {Power Supply 5V};
+        \node (imu) [draw, rectangle, left=of arduino, yshift=-1.5cm, minimum width=2.5cm] {MPU 6500 IMU};
+        
+        \node (elevator_servo) [draw, rectangle, right=of arduino, yshift=1.2cm, minimum width=2cm, minimum height=2cm, align=center] {Left/Right Elevator\\ Servo Motor};
+        \node (aileron_servo) [draw, rectangle, right=of arduino, yshift=-1.2cm, minimum width=2cm, minimum height=2cm, align=center] {Left/Right Aileron\\ Servo Motor};
+        
+        \node (adjust_pitch) [draw, rectangle, right=of elevator_servo, xshift=0.1cm, minimum width=3cm] {Adjust Elevator angle of tilt};
+        \node (adjust_roll) [draw, rectangle, right=of aileron_servo, xshift=0.1cm, minimum width=3cm] {Adjust Aileron angle of tilt};
+        
+        \node (level_flight) [draw, rectangle, below right=0.6cm and -4.6cm of adjust_pitch, minimum width=3cm] {Achieve trimmed flight};
+        \node (reset) [draw, rectangle, right=0.8cm of level_flight, minimum width=2cm,minimum height=2cm, align=center] {Reset to original\\position};
+
+        % Connections
+        \draw[->] (matlab) -- (arduino);
         \draw[->] (power.east) -- ++(0.3,0) |- (arduino.west |- power.east);
-        \draw[<-] (led.west) -- ++(-0.3,0) -| (arduino.east |- led.west);
-        \draw[<-] (motor.west) -- ++(-0.3,0) |- (arduino.east |- motor.west);
-        \draw[->] (led.east) -- (obstacle.west);
-        \draw[->] (obstacle.south) -- (on.north);
-        \draw[->] (obstacle.north) -- (clear.south);
-        \draw[<->] (matlab.south) -- (arduino.north);
-        \draw[->] (clear) -- (human.north);
-        \draw[->] (on.east) -- (human.south);
-    
+        \draw[<->] (imu.east) -- ++(0.3,0) |- (arduino.west |- imu.east);
+        
+        \draw[<-] (elevator_servo.west) -- ++(-0.3,0) -| (arduino.east |- elevator_servo.west);
+        \draw[<-] (aileron_servo.west) -- ++(-0.3,0) |- (arduino.east |- aileron_servo.west);
+
+        % Connect servo motors directly to adjustment blocks
+        \draw[<-] (adjust_pitch.west) -- ++(-0.3,0) -| (elevator_servo.east);
+        \draw[<-] (adjust_roll.west) -- ++(-0.3,0) |- (aileron_servo.east);
+        
+        % Remaining connections
+        \draw[->] (adjust_pitch) -- (level_flight.north);
+        \draw[->] (adjust_roll) -- (level_flight.south);
+        \draw[->] (level_flight.east) -- (reset.west);
+
     \end{tikzpicture}
-    \caption{Block diagram of the obstacle detection system.}
-    \label{fig:obstacle_detection}
+    \caption{Control Flow Diagram for Aircraft Stabilization System}
+    \label{fig:aircraft_stabilization}
 \end{figure}
 
+The system demonstrates the autonomous stabilization of the model aircraft's orientation in real-time through the orientation data provided by the MPU 6500 IMU and control inputs to the ailerons and elevators by servo motors. When the aircraft deviates from a state of trimmed flight or experiences rotation about its center of gravity, the servo motors would control the ailerons and elevators to simulate how the aircraft would adjust itself to correct its orientation when faced with external disturbances such as turbulence.
+
 \begin{itemize}
-    \item \textbf{Power Supply 5V}: 
+    \item \textbf{Power Supply 5V}:
         \begin{itemize}
-            \item \textbf{Input}: The system is powered by a 9V battery, which is stepped down to 5V using voltage regulator. This 5V supply is fed to the Arduino Leonardo and all connected peripherals (Ultrasonic sensor, Servo Motor, and Red LED Warning Light).
+            \item \textbf{Input}: The system is powered by a 9V battery, which is stepped down to 5V using voltage regulator. This 5V supply is fed to the Arduino Leonardo and servo motor.
             \item \textbf{Output}: Provides regulated 5V power to the entire system, ensuring all components receive stable voltage for operation.
         \end{itemize}
-    
-    \item \textbf{Ultrasonic Sensor}: 
-        \begin{itemize}
-            \item \textbf{Input}: The sensor receives a control signal from the Arduino Leonardo to trigger the emission of an ultrasonic pulse.
-            \item \textbf{Output}: The sensor measures the time-of-flight (TOF) of the pulse, calculates the distance to an obstacle, and sends the distance data back to the Arduino Leonardo for processing.
-        \end{itemize}
 
+    \item \textbf{MPU 6500 IMU}:
+        \begin{itemize}
+            \item \textbf{Input}: The IMU receives power from the Arduino Leonardo and senses the plane's movement (Linear acceleration and angular velocity).
+            \item \textbf{Output}: It provides real-time orientation data (pitch and roll) by sending the measured accelerations and angular velocities to the Arduino Leonardo for processing.
+        \end{itemize}
     \item \textbf{Arduino Leonardo}:
         \begin{itemize}
-            \item \textbf{Input}: 
-    \begin{itemize}
-        \item Distance data from the ultrasonic sensor.
-        \item Control signals from MATLAB for visualization and system adjustments.
+            \item \textbf{Input}: The Arduino receives real-time orientation data from the MPU 6500 IMU to calculate the pitch and roll, as well as power from the 5V voltage regulator. It also stores the desired neutral orientation (level flight) as a reference.
+            \item \textbf{Output}: Based on the orientation data, the Arduino sends control signals to the servo motors to adjust the ailerons and elevators and correct the plane’s orientation.
         \end{itemize}
-        \item \textbf{Output}: 
-            \begin{itemize}
-                \item Sends control signals to the servo motor to pan the ultrasonic sensor for scanning.
-                \item Activates the red LED warning light when an obstacle is detected.
-                \item Transmits distance and angle data to MATLAB for real-time visualization.
-            \end{itemize}
-
-    \end{itemize}
-
     \item \textbf{Servo Motor}:
         \begin{itemize}
-            \item \textbf{Input}: Receives control signals from the Arduino Leonardo to rotate the ultrasonic sensor to different angles, allowing for a wide field of view during obstacle detection.
-            \item \textbf{Output}: Adjusts the physical angle of the ultrasonic sensor, enabling the system to scan a larger area for obstacles.
+            \item \textbf{Input}: The servo motors receive control signals from the Arduino Leonardo that determine how much to adjust the angle of the ailerons and elevators.
+            \item \textbf{Output}: The servo motors actuate the ailerons and elevators, adjusting the plane’s orientation to restore stability based on the IMU's feedback.
         \end{itemize}
-
-    \item \textbf{Red LED Warning Light}:
+    \item \textbf{Aileron}:
         \begin{itemize}
-            \item \textbf{Input}: Receives a control signal from the Arduino Leonardo to turn on when an obstacle is detected.
-            \item \textbf{Output}: Provides a visual alert to the user by turning on the red LED when an obstacle is within a predefined distance. If no obstacle is detected, the LED remains off.
+            \item \textbf{Input}: Receives control signal from the Arduino Leonardo to adjust the aircraft's roll (left or right tilt).
+            \item \textbf{Output}: The ailerons move to simulate the increase or decrease of lift on either wing of the aircraft to bring it back to a trimmed flight orientation.
         \end{itemize}
-
-    \item \textbf{MATLAB Software}:
+    \item \textbf{Elevator}:
         \begin{itemize}
-            \item \textbf{Input}: Receives distance and angle data from the Arduino Leonardo via serial communication.
-            \item \textbf{Output}: Displays real-time visualizations of the scanned environment in the form of polar plots.
+            \item \textbf{Input}: Receives control signal from the Arduino Leonardo to adjust the aircraft's pitch (nose-up or nose-down tilt).
+            \item \textbf{Output}: The elevators move to simulate the increase or decrease of lift at the tail of the aircraft which causes the nose to pitch up or down, restoring the plane to a level flight 
+            orientation.
         \end{itemize}
-
-    \item \textbf{Human}:
-        \begin{itemize}
-            \item \textbf{Input}: Receives signal from the Red LED Warning light that will indicate if an obstacle is present.
-            \item \textbf{Output}: Makes the decision to navigate through the environment.
-        \end{itemize}
-
 \end{itemize}
 
-The information flow of the system will be further elaborated in the algorithm overview in \autoref{subsec:Algorithm Overview}.
-
-% \begin{itemize}
-%     \item \textbf{Power Supply}: 
-%         \begin{itemize}
-%             \item 
-%         \end{itemize}The system is powered by a 5V power supply that provides the necessary voltage to the Arduino Leonardo and its connected peripherals.
-    
-%     \item \textbf{Ultrasonic Sensor}: The ultrasonic sensor, mounted on a servo motor, sends distance measurements to the Arduino Leonardo. The sensor continuously relays these distance measurements to the microcontroller for processing.
-
-%     \item \textbf{Arduino Leonardo}: The Arduino Leonardo interprets the distance data from the ultrasonic sensor and controls the servo motor’s position. Based on the distance data, it decides whether to activate the red LED warning light if an obstacle is detected within a threshold distance. It also communicates with the MATLAB software for real-time data visualization.
-
-%     \item \textbf{Servo Motor}: The servo motor is controlled by the Arduino to pan the ultrasonic sensor across a wider field of view for obstacle detection.
-
-%     \item \textbf{Red LED Warning Light}: If the Arduino determines that an obstacle is within a predefined distance, it switches on the red LED warning light to notify the user. If the path is clear, the LED remains off.
-
-%     \item \textbf{MATLAB Software}: The MATLAB software receives distance and angle data from the Arduino Leonardo, processes it, and generates real-time visualizations. The software aids in visualizing the scanned environment, providing the user with immediate feedback on the surrounding obstacles.
-
-% \end{itemize}
-\newpage 
 
 \section{Circuit Diagram}
-% Include a schematic of the circuit showing the connections between the sensor, actuators, HMI, and microcontroller.
-
-% \textbf{The following description might not be applicable once pictorial diagram is not used.} \\
-
-%  Remove if page exceeds 15
-The circuit diagram is designed for compactness and clarity. This is to ensure that the wiring is organized for ease of troubleshooting and maintenance. The overall circuit design is laid out on a breadboard which facilitates rapid prototyping where the modular approach allows for easy reconfiguration or replacement of each component. 
+The circuit diagram prioritizes compactness and clarity, ensuring the wiring is well-organized for straightforward troubleshooting and maintenance. The entire design is arranged on a breadboard, enabling quick prototyping, where the modular structure allows for easy reconfiguration or replacement of individual components.\\\\ 
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=1\linewidth]{Circuit_schem.png}
-    \caption{System Schematic View.}
+    \includegraphics[width=1\linewidth]{Circuit2ndproject_schem.png}
+    \caption{System Schematic View }
     \label{fig:enter-label}
 \end{figure}
 
-
- This system schematic offers a detailed look at the electrical connections and layout, emphasizing modularity and scalability in the design,  allowing the system to be easily expanded with additional sensors or components. Unlike high-level block diagrams, the schematic clearly illustrates how each component interfaces with the Arduino Leonardo for real-time obstacle detection.
-\newline
-
- A pictorial view of the circuit is provided in the Appendix, Figure ~\ref{fig:circuit_diagram}
-
+This schematic diagram represents an electrical system incorporating an Arduino Leonardo microcontroller, several SG90 servo motors, and an IMU MPU-6500 sensor. The power supply consists of a 9V source that is stepped down to 5V using a DC-DC converter, ensuring that the servos and other components receive appropriate voltage. The servos, labeled for controlling the left and right ailerons and elevators, are connected to the Arduino's pulse width modulation (PWM) pins, allowing for precise control. The IMU sensor, responsible for detecting motion and orientation, interfaces with the Arduino through I2C communication. The clear distinction between power lines (VCC 9V, VCC 3.3V) and the organized wiring layout emphasizes a compact and scalable design suitable for applications like flight control systems or robotic mechanisms.\\\\A pictorial view of the circuit is provided in the Appendix, Figure A.2.
 
 \chapter{Implementation}
 \section{Overview}
-The implementation is divided into two primary phases. The first phase focuses on testing the Ultrasonic Sensor's accuracy and adjusting the speed of sound in the code, including conducting proximity and maximum range tests.\\\\The second phase involves integrating the sensor with a Servo, developing a warning system, and visualizing the user's field of vision through a MATLAB graph.
+The characterization of the Inertial Measurement Unit (IMU) is essential to ensure that the aircraft stabilization system can respond swiftly and accurately in dynamic and extreme environments, such as the atmosphere. For this project, a Kalman filter was selected for implementation.\\\\This section further discusses the adjustment of covariance values, which were fine-tuned based on the variance calculated from the IMU measurements. Finally, the section describes the actuation of ailerons and elevators with respect to the IMU, and the flight emulator.
+
+
 \section{Sensor Characterization}
+The Kalman filter relies on tuning its covariance values to balance sensor measurements and predictions. Given the aircraft's need for precision to maintain stable flight, these covariance values must be adjusted based on the variance calculated from real sensor data. Specifically, the three key parameters that require tuning are \( Q_{\text{angle}} \) (process noise variance for the angle), \( Q_{\text{bias}} \) (process noise variance for the gyroscope bias), and \( R_{\text{measure}} \) (measurement noise variance).
 
-To evaluate the sensor's accuracy and performance, we first identify the equation used to calculate distance. The fundamental equation for determining the distance from the sensor is:
+\subsection{Calculation of variance}
+The prototype is put on rest, while the measurements are being read from MatLab, which then we calculate the variance based off the accelerometer and the gyroscope readings, X and Y axis for pitch and roll, respectively.\\\\The calculation for variance is done using the formulae:
 
 \[
-d = \frac{v \cdot t}{2}
+\sigma^2 = \frac{1}{n} \sum_{i=1}^{n} (x_i - \mu)^2
 \]
-where:
-\begin{itemize}
-  \item $d$ is the distance (in meters),
-  \item $v$ is the speed of sound (in meters per second),
-  \item $t$ is the time taken for the sound to return (in seconds).
-\end{itemize}
 
-\subsection{Linear Equation Formulation}
+where the mean \( \mu \) is:
 
-When rearranging the formula, we can express it in a linear form, similar to the linear equation: \( y = mx + c \), where:
 \[
-d = \frac{v}{2} \cdot t + 0
+\mu = \frac{1}{n} \sum_{i=1}^{n} x_i
 \]
-In this case:
-\begin{itemize}
-  \item $d$ is the dependent variable (distance),
-  \item $t$ is the independent variable (time),
-  \item The slope \(m = \frac{v}{2}\) represents half the speed of sound.
-\end{itemize}
-
-Thus, plotting distance against time results in a straight line, with the gradient being proportional to the speed of sound. Any discrepancy in the assumed speed of sound will be reflected in the slope of the line. Suppose we assume a speed of sound that is incorrect for the testing conditions (e.g., atmospheric pressure, temperature). In that case, we will observe an error in the gradient of the line, causing inaccurate distance measurements.
-
-\subsection{Effect of Incorrect Speed of Sound Assumption}
-
-For instance, comparing two cases:
-\begin{itemize}
-  \item Using the correct speed of sound, $v = 343 \, \text{m/s}$ (standard at room temperature),
-  \item Using an incorrect speed of sound, $v = 330 \, \text{m/s}$ (for colder conditions).
-\end{itemize}
-
-As shown in Figure~\ref{fig:sound_graph}, the gap between the two lines widens as the actual distance grows. The error in the calculated distances is proportional to the actual distance, resulting in greater distortions at larger distances.
-
-\begin{figure}
-    \centering
-    \includegraphics[width=0.5\linewidth]{image.png}
-    \caption{Comparison between slopes of two different speeds}
-    \label{fig:sound_graph}
-\end{figure}
-
-\subsection{Test Data Analysis}
-
-To validate this further, we performed tests with distances between 10 cm and 300 cm. The results indicated that as the distance increased, the distortion from the expected values became more pronounced, mainly due to an incorrect assumption about the speed of sound.
-
-\begin{table}[h!]
-\centering
-\caption{Test Data for Distance Measurement (10 cm to 300 cm)}
-\begin{tabular}{|c|c|c|}
-\hline
-\textbf{Actual Distance (cm)} & \textbf{Expected Distance (cm)} & \textbf{Measured Distance (cm)} \\ \hline
-10                            & 10                             & 10.1                            \\ \hline
-50                            & 50                             & 50.5                            \\ \hline
-100                           & 100                            & 102                             \\ \hline
-150                           & 150                            & 154                             \\ \hline
-200                           & 200                            & 208                             \\ \hline
-250                           & 250                            & 260                             \\ \hline
-300                           & 300                            & 315                             \\ \hline
-\end{tabular}
-\end{table}
-
-The gap between the expected and measured distances becomes more pronounced as the distance increases. While minor anomalies in the data are anticipated due to sensor noise and environmental factors, the overall trend indicates greater distortion at longer distances.
-
-\subsection{Determining the Speed of Sound}
-
-To achieve higher accuracy in distance measurement, a key step is to determine the actual speed of sound under specific conditions. By rearranging the equation, we can make the speed of sound the subject:
-\[
-v = \frac{2 \cdot d}{t}
-\]
-The MATLAB script provided in A.10 samples various distances and records the time taken for the sound to return. By calculating the speed of sound at different distances and averaging the results, we can determine a more accurate speed of sound for a specific environment, improving the overall precision of the sensor system. 
 
 
-\subsection{Improved Results with Calculated Speed of Sound}
+\subsubsection{\( Q_{\text{angle}} \)}
+The variable \( Q_{\text{angle}} \) accounts for the uncertainty in the gyroscope's prediction of the next angle. If the prediction model is highly reliable, a smaller \( Q_{\text{angle}} \) is used.\\\\The covariance \( Q_{\text{angle}} \) was determined by calculating the variance from the gyroscope readings on the x and y axes, corresponding to pitch and roll. After testing, the variances changed slightly, from \textbf{0.003} to \textbf{0.0025993} for pitch and \textbf{0.0052626} for roll. Therefore, the initial value of \textbf{0.003} was already optimal for Kalman filter computation.
 
-Using the calculated mean speed of sound, we can improve the accuracy of our distance measurements. By plotting the results with the correct speed of sound (e.g., 343 m/s) versus the calculated speed of sound (e.g., 342 m/s), the data points align more closely, as seen in Figure~\ref{fig:calibrated_graph}.
-
-\begin{figure}[h]
-    \centering
-    % Assuming another graph will be inserted here showing the improved accuracy with calculated speed of sound
-    \includegraphics[width=1\textwidth]{calibrated_sound_example.png}
-    \caption{Distance vs Time: Improved Accuracy with Calculated Speed of Sound}
-    \label{fig:calibrated_graph}
-\end{figure}
-This graph illustrates that by using a more accurate speed of sound, the measured values closely match the expected values, resulting in improved sensor performance and reduced distortions, especially over longer distances.
-
-\subsection{Conclusion}
-
-By determining and using the calculated speed of sound, we enhance the accuracy of our ultrasonic sensor system, particularly over long distances. The MATLAB script enables us to characterize the sensor within the specific environment, resulting in more accurate performance for real-world applications.
-
-
-
-\section{Sensor, Servo and Warning System Integration}
-
-\tikzstyle{startstop} = [rectangle, rounded corners, minimum width=3cm, minimum height=1cm,text centered, draw=black]
-\tikzstyle{process} = [rectangle, minimum width=3cm, minimum height=1cm, text centered, draw=black]
-\tikzstyle{decision} = [diamond, minimum width=3cm, minimum height=1cm, text centered, draw=black]
-\tikzstyle{arrow} = [thick,->,>=stealth]
-
-% \begin{tikzpicture}[node distance=3.5cm, auto, scale=0.7, transform shape]
-
-%     % Nodes
-%     \node (start) [startstop] {Start};
-%     \node (init) [process, below of=start] {Initialize Plot table, Sensors and Servo objects};
-%     \node (setthreshold) [process, below of=init] {Set obstacle\_threshold = 60cm};
-%     \node (while) [decision, below of=setthreshold] {While 1};
-%     \node (checkangle) [decision, below of=while, yshift=-1.5cm] {Is pan\_angle $<$= 180};
-%     \node (panangle) [process, right of=checkangle, xshift=3cm] {pan\_angle = pan\_angle + 1};
-%     \node (subroutine) [process, below of=checkangle, yshift=-1.5cm] {PanAngleSubRoutine};
-%     \node (end) [startstop, below of=subroutine, yshift=-1cm] {End};
-%     \node (isanglepos) [decision, right of=panangle, xshift=3cm] {Is pan\_angle $>$= 0};
-%     \node (subroutine2) [process, below of=isanglepos, yshift=-1cm] {PanAngleSubRoutine};
-%     \node (incangle) [process, below of=subroutine2, yshift=-1cm] {pan\_angle = pan\_angle + 1};
-
-%     % Arrows
-%     \draw [arrow] (start) -- (init);
-%     \draw [arrow] (init) -- (setthreshold);
-%     \draw [arrow] (setthreshold) -- (while);
-%     \draw [arrow] (while) -- node[anchor=east] {True} (checkangle);
-%     \draw [arrow] (checkangle.east) -- node[anchor=south] {True} (panangle.west);
-%     \draw [arrow] (checkangle.south) -- node[anchor=east] {False} (subroutine.north);
-%     \draw [arrow] (subroutine.south) -- (end.north);
-%     \draw [arrow] (panangle.east) -- (isanglepos.west);
-%     \draw [arrow] (isanglepos.south) -- node[anchor=west] {True} (subroutine2.north);
-%     \draw [arrow] (subroutine2.south) -- (incangle.north);
-%     \draw [arrow] (incangle.south) -- ++(0,-0.1) -- ++(-3,0) -- (end.east);
-
-
-%     % Arrow for False in "Is pan_angle <= 180"
-%     \draw [arrow] (checkangle.west) -- ++(-1.5,0) -- ++(0,-3.5) -- (end.west);
-%     \draw [arrow] (isanglepos.north) -- ++(0,0) -- ++(0,2) -- (while.east) node[anchor=south] {False};
-% \end{tikzpicture}
 
 \begin{figure}[H]
-    \begin{tikzpicture}[node distance=3cm, auto, scale=0.8, transform shape]
-        % Nodes
-        \node (start) [startstop] {Start};
-        \node (init) [process, below of=start] {Initialize Plot table, Sensors and Servo objects};
-        \node (setthreshold) [process, below of=init] {Set obstacle\_threshold = 60cm};
-        \node (while) [decision, below of=setthreshold] {While 1};
-        \node (checkangle) [decision, below of=while, yshift=-1cm] {Is pan\_angle $<$= 70};
-        \node (panangle) [process, left of=checkangle, xshift=-3cm, yshift=-2cm] {pan\_angle = pan\_angle + 1};
-        \node (subroutine) [process, below of=checkangle, yshift=-1cm] {PanAngleSubRoutine};
-        % End program
-        % \node (end) [startstop, below of=incangle, yshift=-18cm, xshift=7cm] {End};
-        \node (isanglepos) [decision, right of=checkangle, xshift=4cm] {Is pan\_angle $>$= 50};
-        \node (subroutine2) [process, below of=isanglepos, yshift=-0.5cm] {PanAngleSubRoutine};
-        \node (incangle) [process, below of=subroutine2] {pan\_angle = pan\_angle - 1};
-        % \node (end) [startstop, below of=incangle] {End};
-        % \node (false1) [left of=checkangle, xshift=-2cm] {False};
-        % \node (true1) [above of=checkangle, yshift=0.5cm] {True};
-        % \node (false2) [left of=isanglepos, xshift=-2cm] {False};
-        % \node (true2) [above of=isanglepos, yshift=0.5cm] {True};
-    
-        % Arrows
-        \draw [arrow] (start) -- (init);
-        \draw [arrow] (init) -- (setthreshold);
-        \draw [arrow] (setthreshold) -- (while);
-        \draw [arrow] (while) -- (checkangle);
-        \draw [arrow] (checkangle.east) -- node[anchor=south] {False} (isanglepos.west);
-        \draw [arrow] (checkangle.south) -- node[anchor=east] {True} (subroutine.north);
-        % \draw [arrow] (subroutine.west) -- (panangle.south);
-        \draw [arrow] (subroutine.west) -- ++(0,0) -- ++(-3.94,0) -- (panangle.south);
-        % \draw [arrow] (subroutine.south) -- (end.north);
-        % \draw [arrow] (panangle.north) -- (checkangle.west);
-        \draw [arrow] (panangle.north) -- ++(0,0) -- ++(0,1.5) -- (checkangle.west);
-        \draw [arrow] (isanglepos.south) -- node[anchor=west] {True} (subroutine2.north);
-        % \draw [arrow] (isanglepos.north) -- node[anchor=south] {False} (while.east);
-        \draw [arrow] (isanglepos.north) -- ++(0,0) -- ++(0,1.8) -- (while.east) node[anchor=south] {False};
-        \draw [arrow] (subroutine2.south) -- (incangle.north);
-        % End program
-        % \draw [arrow] (incangle.south) -- (end.north);
-        \draw [arrow] (incangle.west) -- ++(-14,0) -- ++(0,10.5) -- ++(0,0) -- (while.west);
-        % \draw [arrow] (incangle.south) -- ++(0,0) -- ++(0,0) -- (end.north);
-        
-        
-        % \draw [arrow] (isanglepos.north) -- ++(0,0) -- ++(0,2) -- (while.east) node[anchor=south] {False};
-        % \draw [arrow] (checkangle.west) -- ++(-1.5,0) -- ++(0,-3.5) -- (end.west);
-    \end{tikzpicture}
-    \caption{Flowchart of the Pan Angle Routine}
-    \label{fig:flowchart}
+    \centering
+    \includegraphics[width=1\textwidth]{qanglevarianceafteradjustment.JPG}
+    \caption{Variance of gyroscope X axis readings for \( Pitch_{\text{ angle}} \) after adjusting  \( Q_{\text{angle}} \) }
+    \label{fig:q_angle_variance}
 \end{figure}
-The algorithm implemented in this project allows the ultrasonic sensor to perform automated panning movements using a servo motor. This enables the sensor to scan the surrounding environment and detect obstacles within a specified threshold distance.
-
-\subsection{Algorithm Overview}
-\label{subsec:Algorithm Overview}
-This flowchart depicts the Pan Angle Routine used for controlling the servo motor's angle while scanning the surroundings with an ultrasonic sensor. The routine ensures that the servo motor pans the sensor back and forth between defined angles to provide obstacle detection over a wide field of view. 
-\begin{enumerate}
-    \item \textbf{Start:}
-    The routine begins when the system is activated and moves directly into initialization.
-    
-    \item \textbf{Initialize Components:}
-    The system initializes key components:
-    \begin{itemize}
-        \item \textbf{Plot table:} Plots a graph from angle and distance readings.
-        \item \textbf{Sensors:} Ultrasonic sensor is prepared to take measurements.
-        \item \textbf{Servo motor:} Controls the sensor’s panning motion.
-    \end{itemize}
-    
-    \item \textbf{Set Obstacle Threshold:}
-    The obstacle detection threshold is set to 60 cm, classifying objects within this distance as obstacles.
-    
-    \item \textbf{Continuous Scanning:}
-    The system enters an infinite \texttt{while} loop, controlling the servo motor and taking distance measurements.
-    
-    \item \textbf{Check Pan Angle ($\leq 70^\circ$):}
-    The system checks if \texttt{pan\_angle} is less than or equal to 70:
-    \begin{itemize}
-        \item \textbf{True}: Increments the pan angle and calls the \texttt{PanAngleSubRoutine}.
-        \item \textbf{False}: Moves to the next decision block.
-    \end{itemize}
-    
-    \item \textbf{Increment Pan Angle:}
-    If \texttt{pan\_angle} is less than or equal to 70, it increases by 1 degree. The sensor covers more of the environment on the right, and the system calls \texttt{PanAngleSubRoutine} to take measurements.
-    
-    \item \textbf{PanAngleSubRoutine:}
-    This subroutine performs:
-    \begin{itemize}
-        \item Distance measurement using the ultrasonic sensor.
-        \item Data storage (angle and distance) in the plot table.
-        \item Obstacle detection based on the 60 cm threshold.
-    \end{itemize}
-    
-    \item \textbf{Check Pan Angle ($\geq 50^\circ$):}
-    If \texttt{pan\_angle} exceeds 70 degrees, the system checks if it is greater than or equal to 50:
-    \begin{itemize}
-        \item \textbf{True}: Decrements the pan angle and calls the \texttt{PanAngleSubRoutine}.
-        \item \textbf{False}: The process ends or resets.
-    \end{itemize}
-    
-    \item \textbf{Decrement Pan Angle:}
-    If \texttt{pan\_angle} is greater than or equal to 50, it decreases by 1 degree. The servo moves the sensor left, and \texttt{PanAngleSubRoutine} is called again to capture data.
-
-    % \item \textbf{Initialization:}
-    %  The code mainly setups the necessary peripherals for control and sensor reading. Additionally, to visualize the obstacles on a graph, a plot table on MATLAB is created. For the warning system, the obstacle detection threshold is set at \textbf{60 cm}.
-
-    % \item \textbf{Continuous Scanning Loop:}
-    % While the system continuously loops, the servo pans between two angles to emulate the user's field of vision. In between the loops, a routine called \textbf{PanAngleSubRoutine} retrieves ultrasonic sensor readings and makes a decision to warn the user based on detection threshold. 
-\end{enumerate}
-
-\subsection{Parameter Determination}
-
-\begin{itemize}
-    \item \textbf{Speed of Sound:} The \textbf{speed of sound}, is a critical parameter that influences the accuracy of ultrasonic readings. The speed is adjusted after analysing the results from calibration and testing.
-    \[
-    d = \frac{\Delta t \times V_s}{2}
-    \]
-    Where:
-    \begin{itemize}
-        \item \( d \) is the distance to the obstacle.
-        \item \( \Delta t \) is the time taken for the sound waves to travel to the object and back.
-        \item \( V_s \) is the speed of sound in air (typically 343 m/s at room temperature).
-    \end{itemize}
-
-    \item \textbf{Obstacle Threshold:} The obstacle detection threshold is set at \textbf{60 cm}.
-
-    \item \textbf{Panning Range:} The panning range is set between \textbf{50° and 70°}.
-\end{itemize}
-
-\newpage
-
-{\let\clearpage\relax \chapter{Code}}
-% Define custom settings for lstlisting
-\lstset{
-    language=C++,                         % Set the language to C++
-    backgroundcolor=\color{lightgray},    % Set background color
-    frame=single,                         % Add a frame around the code
-    basicstyle=\ttfamily\footnotesize,    % Use a smaller font size (footnotesize)
-    keywordstyle=\color{blue},            % Color keywords
-    commentstyle=\color[RGB]{0,128,0},    % Dark green color for comments
-    caption=Arduino C++ Code for Sensor Application \& Sensor Characterization,             % Caption for the code
-    emph={setup, loop},                   % Specify function names to be bold
-    emphstyle=\bfseries,                  % Style for emphasized text (function names)
-    breaklines=true,                      % Enable line breaking
-    breakatwhitespace=true,               % Allow breaking at whitespace
-}
-
-\section{Code Snippets and Explanations}
-
-This section presents key snippets from the Arduino code, explaining their significance and purpose in the application. The entire main application code can be found here See the main code in Listing~\ref{lst:maincode}.
-
-\subsection{Ultrasonic Sensor Triggering and Distance Calculation}
-
-The following code snippet triggers the ultrasonic sensor to emit a sound wave and measures the time of flight (TOF) for the echo to return. It then calculates the distance to the obstacle using the speed of sound.
-
-\begin{lstlisting}
-// Function to read distance from ultrasonic sensor
-float readSensor(){
-    // Generate trig pulse to start
-    digitalWrite(trigPin, LOW);          // Set trigger pin low
-    delayMicroseconds(2);                // Wait 2 microseconds
-    digitalWrite(trigPin, HIGH);         // Set trigger pin high to send pulse
-    delayMicroseconds(10);               // Hold pulse for 10 microseconds
-    digitalWrite(trigPin, LOW);          // Stop pulse
-    
-    // Measure Time of Flight (TOF)
-    t = pulseIn(echoPin, HIGH);          // Capture the duration for echo return
-    
-    // Calculate the distance using the speed of sound in air (343 m/s)
-    d = scale * t * 343 / 2;             // Distance = (TOF * speed of sound) / 2
-    
-    // Display the calculated distance on serial monitor
-    Serial.print("Distance: ");
-    Serial.print(d);
-    Serial.println(" cm");
-    
-    return d;                            // Return the measured distance
-}
-\end{lstlisting}
-
-\textbf{Explanation:}  
-This function sends a pulse through the ultrasonic sensor using the `trigPin` and measures how long it takes for the echo to return via `echoPin`. The time measured (\texttt{t}) is then used to calculate the distance \(d\) based on the formula:
-\[
-\text{Distance} = \frac{\Delta t \times 343}{2}
-\]
-where \(343 \, \text{m/s}\) is the speed of sound in air at room temperature. The result is printed on the serial monitor for debugging purposes.
-
-\subsection{Servo Sweeping Mechanism and Distance Averaging}
-
-The code snippet below sweeps the servo motor across a specified range of angles, takes multiple readings from the ultrasonic sensor, and computes the average distance for better accuracy.
-
-\begin{lstlisting}
-// Sweep the servo and measure distance at each position
-for (int angle = 50; angle <= 70; angle += 6) {
-    servoX.write(angle);                 // Move the servo to the current angle
-    delayMicroseconds(200);              // Delay to allow the servo to move
-    
-    // Read the distance twice to reduce noise
-    float dist1 = readSensor();          // First distance reading
-    delayMicroseconds(10);               // Short delay between readings
-    float dist2 = readSensor();          // Second distance reading
-    
-    // Compute the average distance
-    float dist = (dist1 + dist2) / 2;    // Average the two distance readings
-    
-    // Check if obstacle is within the defined threshold
-    checkObstacleThreshold(dist);        // Function to warn if within threshold
-}
-\end{lstlisting}
-
-\textbf{Explanation:}  
-This loop moves the servo motor from 50 degrees to 70 degrees in increments of 6 degrees. At each position, the ultrasonic sensor measures the distance twice, and the average of the two readings is computed to minimize measurement noise. This helps ensure more accurate detection of obstacles. The distance is then checked against the obstacle threshold (60 cm), and if the obstacle is too close, a warning (LED) is triggered.
-
-\subsection{Obstacle Detection and LED Warning}
-
-The code snippet checks whether the measured distance is below the defined threshold and activates a warning LED if an obstacle is detected.
-
-\begin{lstlisting}
-// Function to check if the obstacle is within threshold distance
-void checkObstacleThreshold(float dist) {
-    if (dist < obstacleThreshold && dist > 0) {  // If distance is valid and below threshold
-        digitalWrite(warningLedPin, HIGH);       // Turn on the warning LED
-    } else {
-        digitalWrite(warningLedPin, LOW);        // Turn off the warning LED
-    }
-}
-\end{lstlisting}
-
-\textbf{Explanation:}  
-This function compares the measured distance \texttt{dist} to the predefined threshold value \texttt{obstacleThreshold} (60 cm). If the object is detected within this range and the distance is valid (greater than 0), the warning LED connected to \texttt{warningLedPin} is turned on. If the object is farther away or no valid reading is detected, the LED remains off.
-
-{\let\clearpage\relax \chapter{Testing and Results}}
 
 
+
+\subsubsection{\( Q_{\text{bias}} \)}
+The variable \( Q_{\text{bias}} \) represents the process noise covariance for the gyroscope bias, accounting for the uncertainty in how much the bias may drift over time. A larger \( Q_{\text{bias}} \) allows the Kalman filter to adapt more quickly to changes in the bias, while a smaller value assumes the bias is more stable.\\\\Initially, the constant value for \( Q_{\text{bias}} \) was set to \textbf{0.003}. The constant for the covariance \( Q_{\text{bias}} \) was then refined after calculating the variance of the gyroscope bias readings, resulting in a value of \textbf{0.0034243}.
+
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\textwidth]{qanglevarianceafteradjustment.JPG}
+    \caption{Variance of gyroscope X axis readings for \( Pitch_{\text{angle}} \) after adjusting  \( Q_{\text{bias}} \). }
+    \label{fig:q_bias_variance}
+\end{figure}
+
+
+\subsubsection{\( R_{\text{measure}} \)}
+The \( R_{\text{measure}} \) represents the measurement noise covariance and is used to quantify the uncertainty in the accelerometer readings. It reflects how much trust the Kalman filter should place on the sensor data relative to the model’s predictions.\\\\The variance of the accelerometer readings for pitch and roll angles, is calculated to determine the constant value for \( R_{\text{measure}} \).\\\\The following figure shows one example from \( Pitch_{\text{angle}} \) , the variance change after updating the constant value of \( R_{\text{measure}} \).
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\textwidth]{pitch b4 adjust.JPG}
+    \caption{Variance of the accelerometer readings used to calculate \( Pitch_{\text{angle}} \) \textbf{before} adjusting  \( R_{\text{measure}} \). }
+    \label{fig:r_measure_variance_before}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\textwidth]{accelpitchvarianceafteradjust.JPG}
+    \caption{Variance of the accelerometer readings used to calculate \( Pitch_{\text{angle}} \) \textbf{after} adjusting  \( R_{\text{measure}} \). }
+    \label{fig:r_measure_variance_after}
+\end{figure}
+
+The initial covariance used to represent \( R_{\text{measure}} \) is already optimal to represent the noise variance of the accelerometer, and any changes to the constant will not affect the results greatly, as shown in the \textbf{Figure~\ref{fig:r_measure_variance_before}} and \textbf{Figure~\ref{fig:r_measure_variance_after}}. Hence, the \( R_{\text{measure}} \) that is \textbf{0.03f} is used. 
+
+\section{Ailerons and Elevators, and Flight Emulator}
+As shown in the following figures, these are just two examples of the many scenarios that can be observed with the prototype and the flight emulator. The emulator provides real-time visualization of the aircraft’s orientation, allowing the operator to monitor and remotely control the airplane. It displays the aircraft’s attitude (e.g., rolling right or pitching up), along with the pitch and roll angles, which range from -90 to 90 degrees, taking 0 degrees as the normal position. This provides the operator with key information to help manually stabilize the aircraft. The emulator ensures the operator remains fully aware of the aircraft's movements and can intervene when necessary.
+
+
+\begin{figure}[H]
+    \centering
+    \begin{tabular}{cc}
+        \includegraphics[width=0.4\textwidth]{rolling_right.png} & 
+        \includegraphics[width=0.4\textwidth]{simulation_banking_right.JPG} \\
+        \textbf{(a) Aircraft Rolling Right} & \textbf{(b) Emulator Showing Roll Right} \\
+        \includegraphics[width=0.4\textwidth]{pitching_up.png} & 
+        \includegraphics[width=0.4\textwidth]{simulation_pitch_up.JPG} \\
+        \textbf{(c) Aircraft Pitching Up} & \textbf{(d) Emulator Showing Pitch Up} \\
+    \end{tabular}
+    \caption{Visualization of Aircraft Movements and Emulator Feedback: (a) Aircraft rolling to the right, (b) Emulator showing roll right, (c) Aircraft pitching up, (d) Emulator showing pitch up.}
+    \label{fig:flight_control_emulator}
+\end{figure}
+
+
+
+\chapter{Code}
 \section{Overview}
-This section aims to characterize the ultrasonic sensor by examining its performance under various conditions, including its deadband in close proximity, maximum measurable distance, and accuracy influenced by environmental temperature and humidity. To ensure measurement accuracy, the actual speed of sound, affected by these environmental factors, is determined and used for calibration.\\\\Additionally, a test case regarding firefighting application with an ultrasonic sensor is done to evaluate the performance of the sensor in thick smoke conditions.\\\\The test cases are summarized in the following key points:
-
-
-\begin{itemize}
-    \item Comparison between expected distances and measured distance (accuracy)
-    \item Testing the minimum detectable distance (close proximity)
-    \item Testing the maximum detectable distance (range limit)
-    \item Evaluation of object sensing in conditions with smoke (Firefighting application)
-\end{itemize}
-
-    
-\section{Testing Setup}
-The test environment is depicted in the figure listed here: \textbf{Figure~\ref{fig:testroom}}
-
-\begin{itemize}
-    \item \textbf{Location:} Living room, flat surface, 9 metres length and 5 metres wide of space for testing. 
-    \item \textbf{Sensor Accuracy Challenges:} Initial distance measurements showed slight discrepancies, primarily due to variations in environmental temperature and humidity. These factors affected the speed of sound, requiring adjustments on the speed of sound in code to achieve accurate readings.
-    
-\end{itemize}
-
-
-\section{Results}
-
-\subsection{Sensor Characterization: Accuracy}
-A scatter plot with a trend line was used to determine the speed of sound under the test room conditions, yielding \textbf{a value of 326 m/s at 30°C.} \textbf{(see Figure~\ref{fig:scatter_plot_2})}
-
-
-\subsection{Sensor Characterization: Close Proximity}
-The sensor detects objects at a minimum distance of \textbf{1.5 cm}. Distances below \textbf{1 cm} fall within its "dead band," producing errors like "985 cm" and "900 cm." Although the HC-SR04's specified dead band is \textbf{2 cm}, this variation may be due to manufacturing quality. However, in the firefighting scenario, close proximity of 2 cm or less is not an issue, as the threshold is set at \textbf{60 cm}, providing sufficient room for the firefighter to maneuver.
-
-
-
-
-\subsection{Sensor Characterization: Maximum Range}
-As shown in this picture \textbf{Figure~\ref{fig:maximum_range_picture}}, the maximum detection range was found to be \textbf{414 cm}, beyond which the sensor fails to detect the marker and may pick up other objects. In the firefighting application, this range is sufficient, as the alert threshold is set at \textbf{60 cm}, allowing the firefighter ample room to avoid obstacles.
-
-
-\subsection{Sensor Application: Firefighting Scenario}
+The code integrates accelerometer and gyroscope data to estimate pitch and roll angles.\\\\The accelerometer provides a reliable long-term reference, while the gyroscope measures short-term angular velocity. \\\\A Kalman filter combines both sensors to produce a more accurate and stable orientation estimate, essential for maintaining the aircraft's stability.\\\\The figure below illustrates the pitch orientation using the Kalman filter. The accelerometer readings fluctuate but track the filtered output closely, while the gyroscope drifts over time, highlighting its long-term instability.
 
 \begin{figure}[H]
     \centering
-    \begin{subfigure}[b]{0.3\linewidth}
-        \centering
-       \raisebox{0.5cm}{\includegraphics[width=\linewidth]{Threshold Test 0.png}}
-        \caption{Outside detection range.}
-        \label{fig:safe-zone}
-    \end{subfigure}
-    \hfill
-    \begin{subfigure}[b]{0.3\linewidth}
-        \centering
-        \includegraphics[width=\linewidth]{Threshold Test 1.png}
-        \caption{LED triggered within threshold.}
-        \label{fig:threshold-warning}
-    \end{subfigure}
-    \hfill
-    \begin{subfigure}[b]{0.3\linewidth}
-        \centering
-        \includegraphics[width=\linewidth]{Threshold Test 3.png}
-        \caption{Outside field of view range.}
-        \label{fig:within-threshold}
-    \end{subfigure}
-    
-    \caption{Various states of obstacle detection using the ultrasonic sensor helmet system.}
-    \label{fig:combined-images}
+    \includegraphics[width=1\textwidth]{gyroaccelkalman.JPG}
+    \caption{Comparison between filtered value, gyroscope X axis and \( Angle_{\text{pitch}} \) calculated from accelerometer }
+    \label{fig:q_bias_variance}
 \end{figure}
 
 
+\subsection{Readings from the accelerometer}
+The calculation of the pitch and roll angle relative to earth's gravity, from the readings of the accelerometer is as follows:
 
-\subsubsection{Threshold Test}
-The sensor's detection threshold was set at \textbf{60 cm} to provide adequate warning and maneuvering space for the firefighter. During testing, the sensor reliably detected obstacles within this range, triggering the red warning LED to switch ON.
-\begin{figure}[H]
+\[
+\theta_{\text{pitch angle}} = \text{atan2} \left( \frac{\text{accelY}}{\sqrt{\text{accelX}^2 + \text{accelZ}^2}} \right)
+\]
+
+\[
+\theta_{\text{roll angle}} = \text{atan2} \left( \frac{\text{-accelX}}{\sqrt{\text{accelY}^2 + \text{accelZ}^2}} \right)
+\]
+
+
+
+
+
+
+\subsection{Kalman filter algorithm}
+\subsubsection{Predict Step}
+In the predict step, the Kalman filter uses the gyroscope data to predict the new pitch angle based on the previous estimate.
+
+\[
+\hat{\theta}_k = \hat{\theta}_{k-1} + \Delta t \cdot \left( \dot{\theta}_{\text{gyro}} - b_{k-1} \right)
+\]
+
+which corresponds to the original formula:
+
+\[
+\bar{x}_k = F \hat{x}_{k-1} + G u_{k-1}
+\]
+
+
+\lstset{ 
+  language=C++,                   % The language of the code
+  basicstyle=\ttfamily,            % Set font to typewriter
+  frame=single,                    % Put a box around the code
+  captionpos=b,                    % Caption position
+  numbers=left,                    % Line numbers on the left
+  numberstyle=\tiny,               % Line number font size
+  keywordstyle=\color{blue},       % Keywords color
+  commentstyle=\color{red},      % Comments color
+  breaklines=true,                 % Wrap lines if too long
+  backgroundcolor=\color{lightgray}, % Gray background for the code block
+  breakautoindent=true,            % Keep indentation when lines break
+  showspaces=false,                % Don't show spaces in the code
+  showstringspaces=false           % Don't show spaces in strings
+}
+
+\begin{lstlisting}
+// Calculate the angular rate by subtracting the bias from the new angular velocity
+rate = newRate - bias; 
+
+// Update the angle by adding the product of the time step (dt) and the rate to the previous angle
+angle += dt * rate;
+\end{lstlisting}
+
+The Kalman filter also predicts the new uncertainty in the estimate. This is done by updating the error covariance matrix  P, which is a 2x2 matrix representing the uncertainties in both the pitch angle and the bias.
+
+
+\lstset{ 
+  language=C++,                   % The language of the code
+  basicstyle=\ttfamily,            % Set font to typewriter
+  frame=single,                    % Put a box around the code
+  captionpos=b,                    % Caption position
+  numbers=left,                    % Line numbers on the left
+  numberstyle=\tiny,               % Line number font size
+  keywordstyle=\color{blue},       % Keywords color
+  commentstyle=\color{red},      % Comments color
+  breaklines=true,                 % Wrap lines if too long
+  backgroundcolor=\color{lightgray}, % Gray background for the code block
+  breakautoindent=true,            % Keep indentation when lines break
+  showspaces=false,                % Don't show spaces in the code
+  showstringspaces=false           % Don't show spaces in strings
+}
+
+\begin{lstlisting}
+// Update the covariance matrix with the new time step (dt) and process noise
+P[0][0] += dt * (dt * P[1][1] - P[0][1] - P[1][0] + Q_angle);
+
+// Update the off-diagonal elements to account for the time step
+P[0][1] -= dt * P[1][1];
+P[1][0] -= dt * P[1][1];
+
+// Increase the covariance related to the bias by adding the bias noise (Q_bias)
+P[1][1] += Q_bias * dt;
+\end{lstlisting}
+
+In the covariance matrix above, the \textbf{process noise} terms, \( Q_{\text{angle}} \) and \( Q_{\text{bias}} \), determine how much trust is placed in the gyroscope’s predictions. Lower values for these parameters indicate greater confidence in the model, while higher values account for expected noise or drift in the gyroscope, leading to less reliance on the model.
+\\\\
+The \textbf{measurement noise} parameter, \( R_{\text{measure}} \), governs the trust in the accelerometer. A lower \( R_{\text{measure}} \) suggests higher confidence in the accelerometer’s readings, while higher values reflect more measurement noise. 
+\\\\
+By adjusting these parameters, the Kalman filter balances between the model’s predictions and the sensor measurements to provide an optimal estimate of the airacraft's state.
+
+\subsubsection{Update Step}
+In the update step, the Kalman filter corrects the predicted state using the new measurements provided by the sensors, in this case, the accelerometer and gyroscope. The goal of this step is to incorporate the new measurement into the state estimate and reduce the uncertainty in the system. \\
+
+First, the \textit{residual error} is calculated as the difference between the actual sensor measurement ($z_k$), which comes from the accelerometer, and the predicted state ($\hat{z}_k$), which comes from the previous predict step. This residual error reflects the difference between the predicted model state and the sensor data: \[r_k = z_k - \hat{z}_k\]
+
+In the code, this is represented as:
+\begin{lstlisting}
+    float y = newAngle - angle;
+\end{lstlisting}
+
+Next, the \textit{Kalman gain} is computed, which determines how much of the new measurement should be used to adjust the predicted state. The Kalman gain considers both the sensor noise covariance ($R_{\text{measure}}$) and the state uncertainty covariance ($P_k$):
+\[K_k = \bar{P}_k H^T \bar{S}_k^{-1}\]
+where $S_k = H P_{k|k-1} H^T + R_{\text{measure}}$ is the innovation covariance and is used to normalize the residual error and compute the Kalman gain.
+
+In the code, the Kalman gain is calculated as:
+\begin{lstlisting}
+    // Innovation covariance represented by S, measurement noise covariance represented by R_measure
+    float S = P[0][0] + R_measure;
+    
+    // Kalman gain for updating angle, controls how much the new angle measurement will influence the updated angle estimate.
+    K[0] = P[0][0] / S;
+    
+    // Kalman gain for updating bias, controls how much the new measurement will influence the updated bias estimate.
+    K[1] = P[1][0] / S;
+\end{lstlisting}
+
+The covariance matrix P is updated to reflect the reduced uncertainty after incorporating the new measurement:
+\begin{lstlisting}
+    float P00_temp = P[0][0];
+    float P01_temp = P[0][1];
+    P[0][0] -= K[0] * P00_temp;
+    P[0][1] -= K[0] * P01_temp;
+    P[1][0] -= K[1] * P00_temp;
+    P[1][1] -= K[1] * P01_temp;
+\end{lstlisting}
+
+\subsubsection{Correction Step}
+In the update step, the Kalman filter corrects the predicted state using the new measurements provided by the IMU. The correction step is part of the update process, where the objective of this step is to incorporate the new measurement into the state estimate and reduce the uncertainty in the system. 
+
+The corrected state is given by:
+\[\hat{x}_k = \hat{x}_{k|k-1} + K_k r_k\]
+Where:
+\begin{itemize}
+    \item \( \hat{x}_k \) is the corrected state estimate (angle and bias).
+    \item \( \hat{x}_{k|k-1} \) is the predicted state from the previous predict step.
+    \item \( K_k \) is the Kalman gain.
+    \item \( r_k \) is the residual error.
+\end{itemize}
+
+Once the Kalman gain is computed, the predicted angle and bias are updated using the residual error and the Kalman gain. In the code, the correction step is represented by the following lines:
+\begin{lstlisting}
+    angle += K[0] * y;
+    bias += K[1] * y;
+\end{lstlisting}
+
+
+
+
+
+
+
+\chapter{Testing and Results}
+\section{Overview}
+Latency, which is the time delay between when the IMU sends sensor data to the Arduino Leonardo and when the Arduino processes this data and commands the servo motors (left and right ailerons and elevators) to act on it, directly impacts how quickly and accurately the system can respond to changes in orientation or external disturbances. If the latency is too high, the drone may become sluggish, react too slowly to disturbances (e.g., wind gusts), or fail to stabilize in time during fast maneuvers. Conversely, low and consistent latency allows for real-time feedback and quick, precise adjustments, resulting in stable and responsive flight.
+
+Testing for latency provides key insights into the system's performance by:
+
+\begin{itemize} \item Ensuring the control loop, from the IMU input to the servo output via the Arduino Leonardo, operates within an acceptable time frame for real-time stabilization. \item Identifying any delays caused by processing within the Arduino, communication between the IMU and Arduino, or hardware limitations in the servo motors. \item Highlighting areas for optimization, such as reducing computational load on the Arduino or improving communication protocols between components. \end{itemize}
+
+
+ \section{Testing Setup}
+ To test the latency of the drone’s control system, particularly the delay between the IMU sensor (MPU6500) inputs and the servo motor outputs, a controlled setup was created. The drone prototype was kept at rest on a stable surface to isolate any movement-related variables, ensuring that the latency measurements strictly reflected the system’s response time. The IMU was programmed to continuously output acceleration and angular velocity data to a microcontroller (Arduino), where processing and filtering of the data occurred. This data was then used to calculate the appropriate control signals for the servos, which adjusted based on the sensor readings.
+
+\section{Test Results}
+
+\begin{figure}[htbp]
     \centering
-    \begin{subfigure}[b]{0.45\linewidth}
+    \begin{minipage}{0.45\textwidth}
         \centering
-        \includegraphics[height=5cm]{Helmet with smoke.PNG}  % Adjust height as necessary
-        \caption{LED ON during smoke exposure.}
-        \label{fig:led-on}
-    \end{subfigure}
+        \includegraphics[width=\linewidth]{Distribution.png}
+        \caption{Histogram}
+        \label{fig:distribution}
+    \end{minipage}
     \hfill
-    \begin{subfigure}[b]{0.45\linewidth}
+    \begin{minipage}{0.45\textwidth}
         \centering
-        \includegraphics[height=5cm]{Smoke condition test.png}  % Adjust height as necessary
-        \caption{System when worn during smoke test.}
-        \label{fig:smoke-test}
-    \end{subfigure}
-    
-    \caption{Alternate views of LED activation and the system during smoke test.}
-    \label{fig:led-smoke-comparison}
+        \includegraphics[width=\linewidth]{Boxplot.png}
+        \caption{Boxplot Diagram}
+        \label{fig:boxplot}
+    \end{minipage}
 \end{figure}
-\subsubsection{Smoke Condition Test}
-In a smoke-filled box simulating firefighting conditions, the \textbf{sensor successfully detected obstacles}, demonstrating its potential for accurate detection in low-visibility environments. When obstacles were detected within the 60 cm threshold, the red warning LED was activated. These tests characterize the ultrasonic sensor's capabilities, guiding its effective application for obstacle detection in conditions where LiDAR and camera is less effective.
 
+The latency readings were analyzed to assess the responsiveness of the system in the context of a drone with self-stabilization using an IMU MPU6500. The average latency was recorded at \textbf{1.53 ms}, with a maximum latency of \textbf{2.1 ms} and a minimum of \textbf{1.3 ms}. This indicates that, under typical conditions, the system is able to respond to IMU sensor inputs and adjust the servos within an acceptable time frame for real-time stabilization tasks. The \textbf{standard deviation} of the latency values was \textbf{\~200 µs}, suggesting that the system provides relatively consistent performance with minor variations in response time.
 
+These latency values imply that the system should perform well for standard drone operations, such as hovering, gentle turns, and altitude hold, where reaction times below 2 ms are generally sufficient for maintaining stability. However, during more aggressive flight maneuvers or in high-speed conditions, the maximum latency of \textbf{2.1 ms} could result in slightly delayed servo responses, potentially causing minor deviations in stabilization. Overall, the consistency in the latency measurements, with low jitter, ensures that the system will provide predictable and reliable control in most scenarios, making it suitable for practical drone applications. Further optimization of communication protocols and processing algorithms could enhance performance, particularly in challenging flight environments.
 
+ In summary, latency testing is essential for verifying that the system's reaction times are fast enough to maintain stability and performance, especially in dynamic and fast-changing environments where timely control inputs are critical.
 
-
-{\let\clearpage\relax \chapter{Conclusion}}
-
-\vspace{-1.5em} % Adjust this value to control the spacing
+\chapter{Conclusion}
 \section{Project Summary}
-
-This project demonstrated the effectiveness of ultrasonic sensors for obstacle detection in smoke-filled environments. Reliable distance measurements were obtained across varying conditions, with consistent accuracy. The system provided real-time visual feedback through an LED and utilized a servomotor for automated panning, expanding the sensor's field of view. These results highlight the potential of ultrasonic sensors in low-visibility scenarios and lay the groundwork for future improvements.
-
-
-
-
+     By continuously tracking the aircraft's orientation and movements, the IMU enabled real-time stabilization adjustments. When deviations in roll or pitch were detected, a control system—integrating a Kalman filter for noise reduction and a Proportional controller for precise correction adjusted the servo motors to tilt the elevator and ailerons. 
 
 \section{Challenges}
-
-During the project, several challenges were encountered:
-
 \begin{itemize}
-\item \textbf{Speed of Sound Variations}: The sensor readings \textbf{showed deviations of ±2 cm and more}, primarily due to environmental factors like temperature and humidity affecting the speed of sound.
-
-\textbf{\textit{Solution:}} To improve accuracy, the actual speed of sound was calculated by determining the slope from the relationship between measured and actual readings, accounting for the specific temperature and humidity conditions in each environment.
-
-    
-\item \textbf{Field of View (FOV) and Accuracy Tradeoff}: The initial wide FOV was unnecessary, as it included areas outside the user's direct path (his sides), leading to false positives. This caused the detection system to misidentify obstacles, resulting in the blinking of the warning system.
-
-\textbf{\textit{Solution:}} The FOV was narrowed to focus solely on the path in front of the user, \textbf{reducing false positives} and improving overall detection accuracy.
-    
+    \item The lack of a magnetometer in the MPU-6500 IMU limited accurate yaw measurement and made full 3D orientation tracking more challenging, as it lacked a fixed reference for horizontal orientation.
+    \item The absence of a feedback loop prevented dynamic adjustment of Kalman filter weights, limiting adaptability, while the fixed target orientation reduced responsiveness to environmental changes.
 \end{itemize}
-
 
 \section{Future Improvements}
+\begin{figure}[htbp]
+    \centering
+    \hspace*{-2cm}
+    \begin{tikzpicture}[node distance=0.5cm, auto]
+        % Define block styles
+        \tikzstyle{block} = [draw, fill=teal!70, rectangle, minimum height=2em, minimum width=3em, text centered, font=\small\bfseries]
+        \tikzstyle{sum} = [draw, fill=teal!70, circle, node distance=1cm, minimum size=1.2cm] % Adjusted size for larger X
+        \tikzstyle{line} = [draw, -{Stealth[scale=1.2]}]
+        
+        
 
-\begin{itemize}
+        % Nodes
+        \node[sum] (sum) {};  % Summation node with no text
+        % Draw "X" lines inside the summation node to create a large X without arrowheads
 
-    \item \textbf{Automatic Speed of Sound Adjustment:} Integrating temperature and humidity sensors to automatically tune the speed of sound variables in real-time, ensuring accurate distance measurements regardless of environmental conditions.
+        \draw (sum.south west) -- (sum.north east);
+        \draw (sum.north west) -- (sum.south east);
+        
+
+        \node[block, right=of sum] (imu) {IMU};
+        \node[block, right=of imu,minimum width=2cm, minimum height=2cm, align=center] (kalman) {Kalman\\filter};
+        \node[block, right=of kalman,minimum width=2cm, minimum height=2cm, align=center] (pid) {PID\\ Controller};
+        \node[block, right=of pid, minimum width=2cm, minimum height=2cm, align=center] (servo) {Servo motors \\ (flaps \& ailerons)};
+        
+        % Connections
+        \draw[line] (sum) -- node[above] {} (imu);
+        \draw[line] (imu) -- (kalman);
+        \draw[line] (kalman) -- (pid);
+        \draw[line] (pid) -- (servo);
+        \draw[line] (servo.east) -- ++(0.5,0) |- ++(0,-1.5) -| (sum.south);
+        
+        % Labels
+        \node[left=0.2cm of sum, yshift=0.34cm] (ref_input) {Reference input};
+        
+        \draw[-] (ref_input.south) -- (-1.5,0) coordinate (endPoint);  
+        \draw[->] (endPoint) -- (sum.west);  
+        
+        \node[above right=-0.1cm and -1.3cm of sum] {+};
+        \node[below right=-0.1cm and -1.3cm of sum] {-};
+        \node[right=0.2cm of servo, yshift=0.5cm] (output) {Output orientation};
+        
+       \draw[-] (servo.east) -- ++(2,0) coordinate (endLine);  % Draws the initial horizontal line and stores the endpoint in (endLine)
+       \draw[->] (endLine) -- ++(0.3,0);
+    \end{tikzpicture}
+    \caption{Closed-loop control system with PID implementation}
+    \label{fig:control_system}
+\end{figure}
+
+\begin{itemize}    
+    \item \textbf{Add Integral and Derivative Components}: Extend the current proportional-only control by adding Integral and Derivative components to optimize PID gains in real time for varied flight conditions.
+    \item \textbf{Establish a Real-Time Feedback Loop with Dynamic Kalman Filtering}: Create a continuous feedback loop with dynamically adjusted Kalman filter weights to enhance noise reduction and enable responsive, real-time orientation correction.
     
-    \item \textbf{Sensor Fusion for Enhanced Robotic Applications:} With the current sensors on robotic platforms, the addition of an ultrasonic sensor would be advantageous for navigating conditions where LiDAR and cameras are less effective. Such as foggy, smoky, or dusty environments. This is particularly ideal for unmanned rescue missions, where navigating through hazardous conditions is crucial to fulfill mission objectives.
-\end{itemize}
-
-
+    \item \textbf{Incorporate Magnetometer for Enhanced Accuracy}: Integrate additional sensors, such as magnetometers, alongside the IMU to improve orientation accuracy and compensate for yaw drift over time.
+\end{itemize}    
 \appendix
 \chapter{Appendix}
-\section{Presentation Slides}
-Add any additional diagrams or illustrations that may help explain the system.
-
-
-\begin{landscape}
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=1\linewidth]{Circuit_bb.png}
-    \caption{System Circuit Diagram }
-    \label{fig:circuit_diagram}
-\end{figure}
-\end{landscape}
-
-
-
+\section{References}
 \section{Figures}
-
+    \begin{figure}[htbp]
+        \centering
+        \includegraphics[width=0.5\textwidth]{MiniProject2Simulation_1.PNG}
+        \caption{MATLAB's Flight Simulation environment for prototype aircraft}
+        \label{fig:your_label}
+    \end{figure}
+\begin{landscape}
 \begin{figure}[H]
     \centering
-    \includegraphics[width=1.1\linewidth]{LidarMappingInSmoke.PNG}
-    \caption{Unreliable LiDAR mapping in smoky environments}
-    \label{fig:lidar_mapping_smoke}
+    \includegraphics[width=1\linewidth]{SystemUnderRest.PNG}
+    \caption{\centering Comparison of sensor data from IMU under rest conditions; highlighting noise in the accelerometer and drift in the gyroscope readings over time
+    \\Blue line – Accelerometer readings 
+    \\Orange line– Gyroscope readings
+    \\Green line–Kalman Filter}
+    \label{fig:system under rest}
 \end{figure}
+\end{landscape}
+\newpage
 
 \begin{landscape}
 \begin{figure}[H]
     \centering
-    \includegraphics[width=1\linewidth]{Trendgraph_ultrasonicreadings.png}
-    \caption{Ultrasonic Sensor Accuracy Trend}
-    \label{fig:scatter_plot_2}
+    \includegraphics[width=1\linewidth]{SystemInConstantMotion.PNG}
+    \caption{\centering IMU data for a system in constant motion, showing gyroscope drift and periods of stability in accelerometer readings with residual noise
+    \\ \textbf{Blue line} – Accelerometer readings
+    \\ \textbf{Orange line} – Gyroscope readings
+    \\ \textbf{Green line} – Kalman Filter}
+    \label{fig:system_in_motion}
 \end{figure}
 \end{landscape}
 
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.5\linewidth]{Test room.jpg}
-    \caption{Testing room}
-    \label{fig:testroom}
-\end{figure}
 
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.5\linewidth]{maximumrange.jpg}
-    \caption{Maximum range: 414cm}
-    \label{fig:maximum_range_picture}
-\end{figure}
+\section{Source Code}
 
+\subsubsection{Arduino Code}
+% Define colors
+\definecolor{mygray}{gray}{0.95}  % Light grey background
+\definecolor{myred}{rgb}{0.7, 0, 0}  % Red color for comments
 
-\section{The Main Code}
-% Define custom settings for lstlisting
+% Code styling
 \lstset{
-    language=C++,                         % Set the language to C++
-    backgroundcolor=\color{lightgray},    % Set background color
-    frame=single,                         % Add a frame around the code
-    basicstyle=\ttfamily\footnotesize,    % Use a smaller font size (footnotesize)
-    keywordstyle=\color{blue},            % Color keywords
-    commentstyle=\color[RGB]{0,128,0},    % Dark green color for comments
-    caption=Arduino C++ Code for Sensor Application \& Sensor Characterization,             % Caption for the code
-    emph={setup, loop},                   % Specify function names to be bold
-    emphstyle=\bfseries,                  % Style for emphasized text (function names)
-    breaklines=true,                      % Enable line breaking
-    breakatwhitespace=true,               % Allow breaking at whitespace
-    label={lst:maincode}
+  backgroundcolor=\color{mygray},   % Set background color
+  commentstyle=\color{myred},       % Set comment color
+  basicstyle=\ttfamily\small,       % Set font size and style
+  frame=single,                     % Box around the code
+  breaklines=true,                  % Enable line breaking
+  tabsize=2,                        % Set tab size
+  showspaces=false,                 % Don't show spaces
+  showstringspaces=false,           % Don't show spaces in strings
 }
 
 
-\begin{lstlisting}
+
+\begin{lstlisting}[language=C++, caption={Arduino code for aircraft stabilization using ailerons and elevators}]
+#include "FastIMU.h"
+#include <Wire.h>
 #include <Servo.h>
 
-// Define pins for the ultrasonic sensor and servo
-const int trigPin = A2;   // Trigger pin for ultrasonic
-const int echoPin = A3;   // Echo pin for ultrasonic
-const int warningLedPin = 7; // Warning LED on pin D7
-const int servoPin = 6;   // Servo pin on D6
+MPU6500 mpu;  // Define MPU object from the MPU6500 class
+AccelData accelOut;  // Structure to hold accelerometer data
+GyroData gyroOut;    // Structure to hold gyroscope data
+calData cal = {0};  // Structure for calibration data
 
-float t=0, d=0, scale=1e-4; //add scaling calculation here
+float pitch = 0.0, roll = 0.0, yaw = 0.0;  // Euler angles
+const float alpha = 0.97;  // Complementary filter coefficient (0-1)
+unsigned long prevTime = 0;  // To calculate time difference
 
-// Servo object
-Servo servoX;
+// Servo objects for controlling ailerons and elevators
+Servo aileronLeft;
+Servo aileronRight;
+Servo elevatorLeft;
+Servo elevatorRight;
 
-// Obstacle detection threshold (in cm)
-const int obstacleThreshold = 60;
+// Define servo pins
+int aileronLeftPin = 9;
+int aileronRightPin = 10;
+int elevatorLeftPin = 5;
+int elevatorRightPin = 6;
+
+// Initialize previous servo angles
+int prevAileronLeftAngle = 90;
+int prevAileronRightAngle = 90;
+int prevElevatorLeftAngle = 90;
+int prevElevatorRightAngle = 90;
+
+class Kalman {
+public:
+  float Q_angle;   // Process noise variance for the angle
+  float Q_bias;    // Process noise variance for the gyroscope bias
+  float R_measure; // Measurement noise variance (accelerometer)
+
+  float angle;     // Kalman filter's angle estimate
+  float bias;      // Bias estimated by the Kalman filter
+  float rate;      // Unbiased rate (gyro rate - bias)
+
+  float P[2][2];   // Error covariance matrix
+
+  Kalman() {
+    Q_angle = 0.0025f;  // Initial process noise variance for the angle
+    Q_bias = 0.003f;    // Initial process noise variance for gyroscope bias
+    R_measure = 0.03f;  // Measurement noise variance
+
+    angle = 0.0f;  // Initialize angle estimate
+    bias = 0.0f;   // Initialize bias estimate
+    rate = 0.0f;   // Initialize unbiased rate
+
+    // Initialize error covariance matrix P
+    P[0][0] = 0.0f;
+    P[0][1] = 0.0f;
+    P[1][0] = 0.0f;
+    P[1][1] = 0.0f;
+  }
+
+  float getAngle(float newAngle, float newRate, float dt) {
+    // Predict phase
+    rate = newRate - bias;  // Subtract bias from the new gyroscope rate
+    angle += dt * rate;     // Update angle estimate with rate * time
+
+    // Update error covariance matrix
+    P[0][0] += dt * (dt * P[1][1] - P[0][1] - P[1][0] + Q_angle);
+    P[0][1] -= dt * P[1][1];
+    P[1][0] -= dt * P[1][1];
+    P[1][1] += Q_bias * dt;
+
+    // Measurement update phase
+    float S = P[0][0] + R_measure;  // Calculate innovation covariance
+    float K[2];  // Kalman gain
+    K[0] = P[0][0] / S;
+    K[1] = P[1][0] / S;
+
+    float y = newAngle - angle;  // Innovation (measurement - prediction)
+    angle += K[0] * y;  // Update angle estimate
+    bias += K[1] * y;   // Update bias estimate
+
+    // Update the error covariance matrix
+    float P00_temp = P[0][0];
+    float P01_temp = P[0][1];
+    P[0][0] -= K[0] * P00_temp;
+    P[0][1] -= K[0] * P01_temp;
+    P[1][0] -= K[1] * P00_temp;
+    P[1][1] -= K[1] * P01_temp;
+
+    return angle;  // Return the filtered angle
+  }
+};
+
+
+
+// Transmit data to MATLAB
+void transmitToMatLab(float pitchT, float rollT) {
+    Serial.print("111");  // Start transmission header
+    // Transmit accelerometer and gyroscope data as comma-separated values
+    Serial.print(accelOut.accelX, 2); Serial.print(",");
+    Serial.print(accelOut.accelY, 2); Serial.print(",");
+    Serial.print(accelOut.accelZ, 2); Serial.print(",");
+    Serial.print(gyroOut.gyroX, 2); Serial.print(",");
+    Serial.print(gyroOut.gyroY, 2); Serial.print(",");
+    Serial.print(gyroOut.gyroZ, 2); Serial.print(",");
+    Serial.print(pitchT, 2); Serial.print(",");
+    Serial.print(rollT, 2); Serial.print(",");
+    Serial.print("FFF");  // End transmission header
+}
 
 void setup() {
-  // Initialize serial communication for debugging
-  Serial.begin(9600);
+  cal.valid = false;  // Calibration data initially invalid
+  Serial.begin(9600);  // Start serial communication
+  Wire.begin();  // Initialize I2C communication
+  Wire.setClock(400000);  // Set I2C clock to 400kHz
 
-  // Initialize the servo motor
-  servoX.attach(servoPin);
+  delay(2000);  // Give sensors time to initialize
 
-  // Initialize the warning LED pin
-  pinMode(warningLedPin, OUTPUT);
-  pinMode(trigPin,OUTPUT);
-  pinMode(echoPin,INPUT);
+  int err = mpu.init(cal, 0x68);  // Initialize MPU6500
+  if (err != 0) {
+    while (true);  // Stop execution if initialization fails
+  }
+  mpu.calibrateAccelGyro(&cal);  // Perform calibration
+  mpu.init(cal, 0x68);  // Reinitialize with calibration data
+
+  // Attach servos to control pins
+  aileronLeft.attach(aileronLeftPin);
+  aileronRight.attach(aileronRightPin);
+  elevatorLeft.attach(elevatorLeftPin);
+  elevatorRight.attach(elevatorRightPin);
 }
 
-/**
- * \brief Reads the distance from the ultrasonic sensor
- * 
- * This function triggers the ultrasonic sensor to send a pulse
- * and measures the time of flight (TOF) for the echo. It calculates 
- * the distance based on the speed of sound and returns the computed value.
- * 
- * \return float - The measured distance in centimeters
- */
-float readSensor(){
-    // Generate trig pulse to start
-    digitalWrite(trigPin,LOW);
-    delayMicroseconds(2);
-    digitalWrite(trigPin,HIGH);
-    delayMicroseconds(10);
-    digitalWrite(trigPin,LOW);
-  
-    // Measure TOF and compute distance
-    t = pulseIn(echoPin, HIGH);
-    d = scale * t * 343 / 2;  // Speed of sound in cm/us
-
-    // Print result on the serial monitor for debugging
-    Serial.print("Distance: ");
-    Serial.print(d);
-    Serial.println(" cm");
-    delay(30);
-  
-    return d;
-}
-
-/**
- * \brief Checks if the measured distance exceeds the obstacle threshold
- * 
- * This function compares the measured distance to the predefined 
- * obstacle threshold. If the obstacle is closer than the threshold, 
- * the warning LED is turned on, otherwise it is turned off.
- * 
- * \param dist float - The measured distance in centimeters
- */
-void checkObstacleThreshold(float dist){
-    if (dist < obstacleThreshold && dist > 0) { // Ensure distance is valid
-      digitalWrite(warningLedPin, HIGH);  // Turn on the warning LED
-    } else {
-      digitalWrite(warningLedPin, LOW);  // Turn off the warning LED
+// Transmit data to Python simulation application
+void transmitToPythonSimulationApp() {
+  if (Serial.available()) {
+    char rx_char = Serial.read();  // Read incoming data
+    if (rx_char == '.') {
+      Serial.print(roll, 2); Serial.print(", ");
+      Serial.print(pitch, 2); Serial.print(", ");
+      Serial.println(yaw, 2);  // Optionally transmit yaw
     }
+  }
 }
 
-/**
- * \brief Main loop to control the servo and check for obstacles
- * 
- * This loop sweeps the servo from 50 to 70 degrees and back, measuring 
- * the distance using the ultrasonic sensor at each position. The average 
- * of two readings is computed, and if the distance is less than the obstacle 
- * threshold, the warning LED is activated.
- */
+// Function to control servo movements
+void servoControl(float pit, float rol) {
+  int pitchInt = static_cast<int>(pit);  // Convert pitch to integer
+  int rollInt = static_cast<int>(rol);   // Convert roll to integer
+
+  // Calculate new servo angles for ailerons and elevators
+  int aileronLeftAngle = constrain(90 - rollInt - 30, 10, 170);
+  int aileronRightAngle = constrain(90 - rollInt - 30, 10, 170);
+  int elevatorLeftAngle = constrain(90 + pitchInt + 15, 10, 170);
+  int elevatorRightAngle = constrain(90 - pitchInt + 15, 10, 170);
+
+  // Update servo angles if the change is significant (>= 1 degree)
+  if (abs(aileronLeftAngle - prevAileronLeftAngle) >= 1) {
+    aileronLeft.write(aileronLeftAngle);
+    prevAileronLeftAngle = aileronLeftAngle;
+  }
+  if (abs(aileronRightAngle - prevAileronRightAngle) >= 1) {
+    aileronRight.write(aileronRightAngle);
+    prevAileronRightAngle = aileronRightAngle;
+  }
+  if (abs(elevatorLeftAngle - prevElevatorLeftAngle) >= 1) {
+    elevatorLeft.write(elevatorLeftAngle);
+    prevElevatorLeftAngle = elevatorLeftAngle;
+  }
+  if (abs(elevatorRightAngle - prevElevatorRightAngle) >= 1) {
+    elevatorRight.write(elevatorRightAngle);
+    prevElevatorRightAngle = elevatorRightAngle;
+  }
+}
+
+// Create Kalman filter objects for pitch and roll
+Kalman kalmanPitch;
+Kalman kalmanRoll;
+
 void loop() {
-  // Sweep the servo from 50 to 70 degrees
-  for (int angle = 50; angle <= 70; angle+=6) {
-    // Move the servo to the current angle
-    servoX.write(angle);
-    delayMicroseconds(200);  // Allow time for the servo to move
+  mpu.update();  // Update IMU readings
+  mpu.getAccel(&accelOut);  // Get accelerometer data
+  mpu.getGyro(&gyroOut);    // Get gyroscope data
 
-    // Measure the distance using the ultrasonic sensor
-    float dist1 = readSensor();
-    delayMicroseconds(10);   // Small delay between measurements
-    float dist2 = readSensor();
-    float dist = (dist1 + dist2) / 2;  // Average the two distance readings
+  // Calculate time difference in seconds
+  unsigned long currentTime = millis();
+  float dt = (currentTime - prevTime) / 1000.0;
+  prevTime = currentTime;
 
-    checkObstacleThreshold(dist);  // Warn the user if distance is within obstacle threshold
-  }
+  // Calculate pitch and roll from accelerometer
+  float accelPitch = atan2(accelOut.accelY, sqrt(accelOut.accelX * accelOut.accelX + accelOut.accelZ * accelOut.accelZ)) * 180.0 / PI;
+  float accelRoll = atan2(-accelOut.accelX, sqrt(accelOut.accelY * accelOut.accelY + accelOut.accelZ * accelOut.accelZ)) * 180.0 / PI;
 
-  // Sweep the servo back from 70 to 50 degrees
-  for (int angle = 70; angle >= 50; angle-=6) {
-    // Move the servo to the current angle
-    servoX.write(angle);
-    delayMicroseconds(200);  // Allow time for the servo to move
+  // Use Kalman filter to estimate pitch and roll
+  pitch = kalmanPitch.getAngle(accelPitch, gyroOut.gyroX, dt);
+  roll = kalmanRoll.getAngle(accelRoll, gyroOut.gyroY, dt);
 
-    // Measure the distance using the ultrasonic sensor
-    float dist1 = readSensor();
-    delayMicroseconds(10);   // Small delay between measurements
-    float dist2 = readSensor();
-    float dist = (dist1 + dist2) / 2;  // Average the two distance readings
+  // Control servos based on pitch and roll values
+  servoControl(pitch, roll);
 
-    checkObstacleThreshold(dist);  // Warn the user if distance is within obstacle threshold
-  }
+  // Transmit data to external applications
+  transmitToPythonSimulationApp();
+  transmitToMatLab(pitch, roll);
+
+  delay(40);  // Short delay for system stability
 }
-
 \end{lstlisting}
 
-\\\\\textbf{MATLAB Code:}
-
-% Define custom settings for lstlisting
-\lstset{
-    language=Matlab,                     % Set the language to MATLAB
-    backgroundcolor=\color{lightgray},   % Set background color for the code box
-    frame=single,                        % Add a frame around the code
-    basicstyle=\ttfamily,                % Use a typewriter font
-    keywordstyle=\color{blue},           % Set keyword color
-    commentstyle=\color[RGB]{0,128,0},   % Dark green color for comments
-    caption=MATLAB Code,                 % Caption for the code
-    breaklines=true,                     % Enable line breaking
-    breakatwhitespace=true,              % Allow line breaks at whitespace
-    showspaces=false,                    % Do not show spaces as symbols
-}
+\subsubsection{Python Emulator Code}
 
 
-\begin{lstlisting}
-% Initialize connection to Arduino
-a = arduino('COM3', 'Leonardo');  % Replace 'COM3' with your actual port
-triggerPin = 'D9';
-echoPin = 'D10';
 
-% Define known distances (in meters)
-distances = [0.10, 0.20, 0.30, 0.40, 0.50, 0.60, 0.70, 0.80, 0.90, 1.0];  % Known distances
-
-% Initialize an empty array to store time values
-time_values = zeros(1, length(distances));
-
-% Loop through the number of measurements (one for each distance)
-for i = 1:length(distances)
-    disp(['Place the object at ' num2str(distances(i)) ' meters']);
-    pause(10);  % Give time to adjust the object
-    
-    % Take measurement from the HC-SR04 sensor
-    time_taken = readUltrasonicDistance(a, triggerPin, echoPin);  % Time taken (in seconds)
-    
-    % Store the recorded time
-    time_values(i) = time_taken;
-    
-    % Display the recorded time for user feedback
-    disp(['Time recorded for ' num2str(distances(i))'meters: ' num2str(time_taken) 'seconds']);
-    
-    pause(1);  % Pause before the next measurement
-end
-
-% Calculate speed of sound for each distance using v = 2 * d / t
-speed_of_sound_values = (2 .* distances) ./ time_values;
-
-% Calculate the mean speed of sound
-mean_speed_of_sound = mean(speed_of_sound_values);
-
-% Display results
-disp('Recorded time values (in seconds):');
-disp(time_values);
-
-disp('Speed of sound values for each distance (in m/s):');
-disp(speed_of_sound_values);
-
-disp('Mean speed of sound (in m/s):');
-disp(mean_speed_of_sound);
-
-% Clean up the connection
-clear a;
-\end{lstlisting}
 
 \end{document}
