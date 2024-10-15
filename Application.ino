@@ -1,566 +1,231 @@
-\documentclass[a4paper,12pt]{report}
-\usepackage{graphicx}
-\usepackage{amsmath}
-\usepackage{float}
-\usepackage{listings}
-\usepackage{xcolor}
-\usepackage[left=25mm,right=25mm,top=5mm,bottom=25mm,paper=a4paper]{geometry}
-\usepackage{hyperref}
-\usepackage{tikz}
-\usepackage{lscape}
-\usepackage{pdflscape}
-\usepackage{subcaption}
-\usepackage{pgfplots}
-\usepackage{caption}
-\usepackage{longtable}
-\usepackage{hyperref}
-\usepackage{titlesec}
-
-\usetikzlibrary{arrows, arrows.meta, shapes, positioning, shapes.geometric}
-\pgfplotsset{compat=1.18}
-
-\begin{document}
-
-% Title Page
-\title{Automatic Flight Stabilization Control System}
-\author{
-  Stafford Ho Sheng Xian \\
-  Yugendren S/O Sooriya Moorthi \\
-  Reuben Low Yu Xiang \\
-  Mohammed Muslimin Bin Mohd Saleh \\
-  Caleb Lee Jia Le
-  \\
-  \\{[RSE4501]}
-}
-
-\date{[15/10/24]}
-\maketitle
-
-\chapter{Introduction}
-\section{Project Objectives}
-\begin{itemize}
-    \item Characterize the IMU by determining its sensitivity, minimum detectable movement, maximum measurable range and latency to achieve the desired accuracy.
-    \item Understand the operational principles of IMUs to optimize their performance for motion tracking and orientation sensing.
-    \item Improve the accuracy of orientation tracking in aircraft stabilization by combining PID control with Kalman filtering, minimizing the impact of sensor noise and disturbances.
-\end{itemize}
-
-\section{Background}
-    An Inertial Measurement Unit (IMU) is a sensor that combines accelerometers, gyroscopes, and sometimes magnetometers to measure an object's specific force, angular rate, and orientation in 3D space. IMUs detect linear acceleration and angular velocity, allowing them to track changes in position and orientation over time.\\\\Originally developed for aerospace and military applications, IMUs are now widely used in robotics, smartphones, drones, and automotive systems. They play a crucial role in navigation, stabilization, and motion tracking, where accurate data about the device's movement is required. Modern IMUs, such as the MPU-6500, often include a Digital Motion Processor (DMP) to perform complex calculations internally, reducing the processing load on the main system and enhancing real-time performance.\\\\In this project, we aim to demonstrate the application of the MPU-6500 IMU for real-time orientation tracking of a prototype aircraft. When the aircraft deviates from level orientation, servomotors will dynamically adjust the tilt of the elevator and ailerons to restore stability. This process allows the aircraft to automatically correct its roll and pitch by modulating lift in response to simulated turbulence, effectively mimicking an aircraft stabilization system.
-    
-\chapter{Project Components}
-\section{Hardware Components}
-
-\subsection{Microcontroller}
-\begin{itemize}
-    \item \textbf{Arduino Leonardo Pro Micro (Quantity: 1)}: Compact and ideal for embedded applications due to its small size, this component was chosen for the project because of its portability and the adequate number of I/O pins, which are sufficient for basic control and sensor connections.
-\end{itemize}
-
-\subsection{Sensors}
-\begin{itemize}
-    \item \textbf{MPU-6500 (Quantity: 1)}: This 6-axis Inertial Measurement Unit (IMU) integrates a 3-axis gyroscope and a 3-axis accelerometer, allowing it to capture both angular velocity and linear acceleration along the X, Y, and Z axes. It includes a Digital Motion Processor (DMP) that processes raw sensor data internally, reducing the processing load on the main microcontroller.
-\end{itemize}
-
-
-\subsection{Actuators}
-\begin{itemize}
-    \item \textbf{TowerPro SG90 Mini Micro Digital Servo 9g (Quantity: 4)}: This component is used to enable automated panning movements by integrating it with an Arduino, allowing for programmed motion control within the system.
-\end{itemize}
-
-\section{Software Components}
-
-\subsection{Programming Language and Tools}
-The project utilizes \textbf{Arduino} for IMU measurements and servo control routines, while \textbf{MATLAB} provides a visual representation of the user's 120-degree field of vision on a graph.
-
-\subsection{Libraries Used}
-
-\begin{itemize}
-    \item \textbf{stdio.h}: A standard C library used to print debugging messages, such as IMU readings, to the console.
-    \item \textbf{Servo.h}: A library used to control the servo motor by sending signals to set its position between 50 and 70 degrees, to emulate the user's field of vision.
-\end{itemize}
-
-\chapter{System Design and Architecture}
-\section{System Block Diagram}
-\begin{figure}[htbp]
-    \centering
-    \begin{tikzpicture}[node distance=0.8cm, auto, scale=0.8, transform shape]
-    
-        % Nodes
-        \node (matlab) [draw, dashed, rectangle, minimum width=2.5cm] {MATLAB};
-        \node (arduino) [draw, rectangle, below=of matlab, minimum width=2.5cm, minimum height=4cm] {Arduino Leonardo};
-        
-        \node (power) [draw, rectangle, left=of arduino, yshift=1.5cm, minimum width=2.5cm] {Power Supply 5V};
-        \node (imu) [draw, rectangle, left=of arduino, yshift=-1.5cm, minimum width=2.5cm] {MPU 6500 IMU};
-        
-        \node (elevator_servo) [draw, rectangle, right=of arduino, yshift=1.2cm, minimum width=2cm, minimum height=2cm, align=center] {Left/Right Elevator\\ Servo Motor};
-        \node (aileron_servo) [draw, rectangle, right=of arduino, yshift=-1.2cm, minimum width=2cm, minimum height=2cm, align=center] {Left/Right Aileron\\ Servo Motor};
-        
-        \node (adjust_pitch) [draw, rectangle, right=of elevator_servo, xshift=0.1cm, minimum width=3cm] {Adjust Elevator angle of tilt};
-        \node (adjust_roll) [draw, rectangle, right=of aileron_servo, xshift=0.1cm, minimum width=3cm] {Adjust Aileron angle of tilt};
-        
-        \node (level_flight) [draw, rectangle, below right=0.6cm and -4.6cm of adjust_pitch, minimum width=3cm] {Achieve trimmed flight};
-        \node (reset) [draw, rectangle, right=0.8cm of level_flight, minimum width=2cm,minimum height=2cm, align=center] {Reset to original\\position};
-
-        % Connections
-        \draw[->] (matlab) -- (arduino);
-        \draw[->] (power.east) -- ++(0.3,0) |- (arduino.west |- power.east);
-        \draw[<->] (imu.east) -- ++(0.3,0) |- (arduino.west |- imu.east);
-        
-        \draw[<-] (elevator_servo.west) -- ++(-0.3,0) -| (arduino.east |- elevator_servo.west);
-        \draw[<-] (aileron_servo.west) -- ++(-0.3,0) |- (arduino.east |- aileron_servo.west);
-
-        % Connect servo motors directly to adjustment blocks
-        \draw[<-] (adjust_pitch.west) -- ++(-0.3,0) -| (elevator_servo.east);
-        \draw[<-] (adjust_roll.west) -- ++(-0.3,0) |- (aileron_servo.east);
-        
-        % Remaining connections
-        \draw[->] (adjust_pitch) -- (level_flight.north);
-        \draw[->] (adjust_roll) -- (level_flight.south);
-        \draw[->] (level_flight.east) -- (reset.west);
-
-    \end{tikzpicture}
-    \caption{Control Flow Diagram for Aircraft Stabilization System}
-    \label{fig:aircraft_stabilization}
-\end{figure}
-
-The system demonstrates the autonomous stabilization of the model aircraft's orientation in real-time through the orientation data provided by the MPU 6500 IMU and control inputs to the ailerons and elevators by servo motors. When the aircraft deviates from a state of trimmed flight or experiences rotation about its center of gravity, the servo motors would control the ailerons and elevators to simulate how the aircraft would adjust itself to correct its orientation when faced with external disturbances such as turbulence.
-
-\begin{itemize}
-    \item \textbf{Power Supply 5V}:
-        \begin{itemize}
-            \item \textbf{Input}: The system is powered by a 9V battery, which is stepped down to 5V using voltage regulator. This 5V supply is fed to the Arduino Leonardo and servo motor.
-            \item \textbf{Output}: Provides regulated 5V power to the entire system, ensuring all components receive stable voltage for operation.
-        \end{itemize}
-
-    \item \textbf{MPU 6500 IMU}:
-        \begin{itemize}
-            \item \textbf{Input}: The IMU receives power from the Arduino Leonardo and senses the plane's movement (Linear acceleration and angular velocity).
-            \item \textbf{Output}: It provides real-time orientation data (pitch and roll) by sending the measured accelerations and angular velocities to the Arduino Leonardo for processing.
-        \end{itemize}
-    \item \textbf{Arduino Leonardo}:
-        \begin{itemize}
-            \item \textbf{Input}: The Arduino receives real-time orientation data from the MPU 6500 IMU to calculate the pitch and roll, as well as power from the 5V voltage regulator. It also stores the desired neutral orientation (level flight) as a reference.
-            \item \textbf{Output}: Based on the orientation data, the Arduino sends control signals to the servo motors to adjust the ailerons and elevators and correct the plane’s orientation.
-        \end{itemize}
-    \item \textbf{Servo Motor}:
-        \begin{itemize}
-            \item \textbf{Input}: The servo motors receive control signals from the Arduino Leonardo that determine how much to adjust the angle of the ailerons and elevators.
-            \item \textbf{Output}: The servo motors actuate the ailerons and elevators, adjusting the plane’s orientation to restore stability based on the IMU's feedback.
-        \end{itemize}
-    \item \textbf{Aileron}:
-        \begin{itemize}
-            \item \textbf{Input}: Receives control signal from the Arduino Leonardo to adjust the aircraft's roll (left or right tilt).
-            \item \textbf{Output}: The ailerons move to simulate the increase or decrease of lift on either wing of the aircraft to bring it back to a trimmed flight orientation.
-        \end{itemize}
-    \item \textbf{Elevator}:
-        \begin{itemize}
-            \item \textbf{Input}: Receives control signal from the Arduino Leonardo to adjust the aircraft's pitch (nose-up or nose-down tilt).
-            \item \textbf{Output}: The elevators move to simulate the increase or decrease of lift at the tail of the aircraft which causes the nose to pitch up or down, restoring the plane to a level flight 
-            orientation.
-        \end{itemize}
-\end{itemize}
-
-
-\section{Circuit Diagram}
-The circuit diagram prioritizes compactness and clarity, ensuring the wiring is well-organized for straightforward troubleshooting and maintenance. The entire design is arranged on a breadboard, enabling quick prototyping, where the modular structure allows for easy reconfiguration or replacement of individual components.\\\\ 
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=1\linewidth]{Circuit2ndproject_schem.png}
-    \caption{System Schematic View }
-    \label{fig:enter-label}
-\end{figure}
-
-This schematic diagram represents an electrical system incorporating an Arduino Leonardo microcontroller, several SG90 servo motors, and an IMU MPU-6500 sensor. The power supply consists of a 9V source that is stepped down to 5V using a DC-DC converter, ensuring that the servos and other components receive appropriate voltage. The servos, labeled for controlling the left and right ailerons and elevators, are connected to the Arduino's pulse width modulation (PWM) pins, allowing for precise control. The IMU sensor, responsible for detecting motion and orientation, interfaces with the Arduino through I2C communication. The clear distinction between power lines (VCC 9V, VCC 3.3V) and the organized wiring layout emphasizes a compact and scalable design suitable for applications like flight control systems or robotic mechanisms.\\\\A pictorial view of the circuit is provided in the Appendix, Figure A.2.
-
-\chapter{Implementation}
-\section{Overview}
-The characterization of the Inertial Measurement Unit (IMU) is essential to ensure that the aircraft stabilization system can respond swiftly and accurately in dynamic and extreme environments, such as the atmosphere. For this project, a Kalman filter was selected for implementation.\\\\This section further discusses the adjustment of covariance values, which were fine-tuned based on the variance calculated from the IMU measurements. Finally, the section describes the actuation of ailerons and elevators with respect to the IMU, and the flight emulator.
-
-
-\section{Sensor Characterization}
-The Kalman filter relies on tuning its covariance values to balance sensor measurements and predictions. Given the aircraft's need for precision to maintain stable flight, these covariance values must be adjusted based on the variance calculated from real sensor data. Specifically, the three key parameters that require tuning are \( Q_{\text{angle}} \) (process noise variance for the angle), \( Q_{\text{bias}} \) (process noise variance for the gyroscope bias), and \( R_{\text{measure}} \) (measurement noise variance).
-
-\subsection{Calculation of variance}
-The prototype is put on rest, while the measurements are being read from MatLab, which then we calculate the variance based off the accelerometer and the gyroscope readings, X and Y axis for pitch and roll, respectively.\\\\The calculation for variance is done using the formulae:
-
-\[
-\sigma^2 = \frac{1}{n} \sum_{i=1}^{n} (x_i - \mu)^2
-\]
-
-where the mean \( \mu \) is:
-
-\[
-\mu = \frac{1}{n} \sum_{i=1}^{n} x_i
-\]
-
-
-\subsubsection{\( Q_{\text{angle}} \)}
-The variable \( Q_{\text{angle}} \) accounts for the uncertainty in the gyroscope's prediction of the next angle. If the prediction model is highly reliable, a smaller \( Q_{\text{angle}} \) is used.\\\\The covariance \( Q_{\text{angle}} \) was determined by calculating the variance from the gyroscope readings on the x and y axes, corresponding to pitch and roll. After testing, the variances changed slightly, from \textbf{0.003} to \textbf{0.0025993} for pitch and \textbf{0.0052626} for roll. Therefore, the initial value of \textbf{0.003} was already optimal for Kalman filter computation.
-
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=1\textwidth]{qanglevarianceafteradjustment.JPG}
-    \caption{Variance of gyroscope X axis readings for \( Pitch_{\text{ angle}} \) after adjusting  \( Q_{\text{angle}} \) }
-    \label{fig:q_angle_variance}
-\end{figure}
-
-
-
-\subsubsection{\( Q_{\text{bias}} \)}
-The variable \( Q_{\text{bias}} \) represents the process noise covariance for the gyroscope bias, accounting for the uncertainty in how much the bias may drift over time. A larger \( Q_{\text{bias}} \) allows the Kalman filter to adapt more quickly to changes in the bias, while a smaller value assumes the bias is more stable.\\\\Initially, the constant value for \( Q_{\text{bias}} \) was set to \textbf{0.003}. The constant for the covariance \( Q_{\text{bias}} \) was then refined after calculating the variance of the gyroscope bias readings, resulting in a value of \textbf{0.0034243}.
-
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=1\textwidth]{qanglevarianceafteradjustment.JPG}
-    \caption{Variance of gyroscope X axis readings for \( Pitch_{\text{angle}} \) after adjusting  \( Q_{\text{bias}} \). }
-    \label{fig:q_bias_variance}
-\end{figure}
-
-
-\subsubsection{\( R_{\text{measure}} \)}
-The \( R_{\text{measure}} \) represents the measurement noise covariance and is used to quantify the uncertainty in the accelerometer readings. It reflects how much trust the Kalman filter should place on the sensor data relative to the model’s predictions.\\\\The variance of the accelerometer readings for pitch and roll angles, is calculated to determine the constant value for \( R_{\text{measure}} \).\\\\The following figure shows one example from \( Pitch_{\text{angle}} \) , the variance change after updating the constant value of \( R_{\text{measure}} \).
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=1\textwidth]{pitch b4 adjust.JPG}
-    \caption{Variance of the accelerometer readings used to calculate \( Pitch_{\text{angle}} \) \textbf{before} adjusting  \( R_{\text{measure}} \). }
-    \label{fig:r_measure_variance_before}
-\end{figure}
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=1\textwidth]{accelpitchvarianceafteradjust.JPG}
-    \caption{Variance of the accelerometer readings used to calculate \( Pitch_{\text{angle}} \) \textbf{after} adjusting  \( R_{\text{measure}} \). }
-    \label{fig:r_measure_variance_after}
-\end{figure}
-
-The initial covariance used to represent \( R_{\text{measure}} \) is already optimal to represent the noise variance of the accelerometer, and any changes to the constant will not affect the results greatly, as shown in the \textbf{Figure~\ref{fig:r_measure_variance_before}} and \textbf{Figure~\ref{fig:r_measure_variance_after}}. Hence, the \( R_{\text{measure}} \) that is \textbf{0.03f} is used. 
-
-\section{Ailerons and Elevators, and Flight Emulator}
-As shown in the following figures, these are just two examples of the many scenarios that can be observed with the prototype and the flight emulator. The emulator provides real-time visualization of the aircraft’s orientation, allowing the operator to monitor and remotely control the airplane. It displays the aircraft’s attitude (e.g., rolling right or pitching up), along with the pitch and roll angles, which range from -90 to 90 degrees, taking 0 degrees as the normal position. This provides the operator with key information to help manually stabilize the aircraft. The emulator ensures the operator remains fully aware of the aircraft's movements and can intervene when necessary.
-
-
-\begin{figure}[H]
-    \centering
-    \begin{tabular}{cc}
-        \includegraphics[width=0.4\textwidth]{rolling_right.png} & 
-        \includegraphics[width=0.4\textwidth]{simulation_banking_right.JPG} \\
-        \textbf{(a) Aircraft Rolling Right} & \textbf{(b) Emulator Showing Roll Right} \\
-        \includegraphics[width=0.4\textwidth]{pitching_up.png} & 
-        \includegraphics[width=0.4\textwidth]{simulation_pitch_up.JPG} \\
-        \textbf{(c) Aircraft Pitching Up} & \textbf{(d) Emulator Showing Pitch Up} \\
-    \end{tabular}
-    \caption{Visualization of Aircraft Movements and Emulator Feedback: (a) Aircraft rolling to the right, (b) Emulator showing roll right, (c) Aircraft pitching up, (d) Emulator showing pitch up.}
-    \label{fig:flight_control_emulator}
-\end{figure}
-
-
-
-\chapter{Code}
-\section{Overview}
-The code integrates accelerometer and gyroscope data to estimate pitch and roll angles.\\\\The accelerometer provides a reliable long-term reference, while the gyroscope measures short-term angular velocity. \\\\A Kalman filter combines both sensors to produce a more accurate and stable orientation estimate, essential for maintaining the aircraft's stability.\\\\The figure below illustrates the pitch orientation using the Kalman filter. The accelerometer readings fluctuate but track the filtered output closely, while the gyroscope drifts over time, highlighting its long-term instability.
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=1\textwidth]{gyroaccelkalman.JPG}
-    \caption{Comparison between filtered value, gyroscope X axis and \( Angle_{\text{pitch}} \) calculated from accelerometer }
-    \label{fig:q_bias_variance}
-\end{figure}
-
-
-\subsection{Readings from the accelerometer}
-The calculation of the pitch and roll angle relative to earth's gravity, from the readings of the accelerometer is as follows:
-
-\[
-\theta_{\text{pitch angle}} = \text{atan2} \left( \frac{\text{accelY}}{\sqrt{\text{accelX}^2 + \text{accelZ}^2}} \right)
-\]
-
-\[
-\theta_{\text{roll angle}} = \text{atan2} \left( \frac{\text{-accelX}}{\sqrt{\text{accelY}^2 + \text{accelZ}^2}} \right)
-\]
-
-
-
-
-
-
-\subsection{Kalman filter algorithm}
-\subsubsection{Predict Step}
-In the predict step, the Kalman filter uses the gyroscope data to predict the new pitch angle based on the previous estimate.
-
-\[
-\hat{\theta}_k = \hat{\theta}_{k-1} + \Delta t \cdot \left( \dot{\theta}_{\text{gyro}} - b_{k-1} \right)
-\]
-
-which corresponds to the original formula:
-
-\[
-\bar{x}_k = F \hat{x}_{k-1} + G u_{k-1}
-\]
-
-
-\lstset{ 
-  language=C++,                   % The language of the code
-  basicstyle=\ttfamily,            % Set font to typewriter
-  frame=single,                    % Put a box around the code
-  captionpos=b,                    % Caption position
-  numbers=left,                    % Line numbers on the left
-  numberstyle=\tiny,               % Line number font size
-  keywordstyle=\color{blue},       % Keywords color
-  commentstyle=\color{red},      % Comments color
-  breaklines=true,                 % Wrap lines if too long
-  backgroundcolor=\color{lightgray}, % Gray background for the code block
-  breakautoindent=true,            % Keep indentation when lines break
-  showspaces=false,                % Don't show spaces in the code
-  showstringspaces=false           % Don't show spaces in strings
-}
-
-\begin{lstlisting}
-// Calculate the angular rate by subtracting the bias from the new angular velocity
-rate = newRate - bias; 
-
-// Update the angle by adding the product of the time step (dt) and the rate to the previous angle
-angle += dt * rate;
-\end{lstlisting}
-
-The Kalman filter also predicts the new uncertainty in the estimate. This is done by updating the error covariance matrix  P, which is a 2x2 matrix representing the uncertainties in both the pitch angle and the bias.
-
-
-\lstset{ 
-  language=C++,                   % The language of the code
-  basicstyle=\ttfamily,            % Set font to typewriter
-  frame=single,                    % Put a box around the code
-  captionpos=b,                    % Caption position
-  numbers=left,                    % Line numbers on the left
-  numberstyle=\tiny,               % Line number font size
-  keywordstyle=\color{blue},       % Keywords color
-  commentstyle=\color{red},      % Comments color
-  breaklines=true,                 % Wrap lines if too long
-  backgroundcolor=\color{lightgray}, % Gray background for the code block
-  breakautoindent=true,            % Keep indentation when lines break
-  showspaces=false,                % Don't show spaces in the code
-  showstringspaces=false           % Don't show spaces in strings
-}
-
-\begin{lstlisting}
-// Update the covariance matrix with the new time step (dt) and process noise
-P[0][0] += dt * (dt * P[1][1] - P[0][1] - P[1][0] + Q_angle);
-
-// Update the off-diagonal elements to account for the time step
-P[0][1] -= dt * P[1][1];
-P[1][0] -= dt * P[1][1];
-
-// Increase the covariance related to the bias by adding the bias noise (Q_bias)
-P[1][1] += Q_bias * dt;
-\end{lstlisting}
-
-In the covariance matrix above, the \textbf{process noise} terms, \( Q_{\text{angle}} \) and \( Q_{\text{bias}} \), determine how much trust is placed in the gyroscope’s predictions. Lower values for these parameters indicate greater confidence in the model, while higher values account for expected noise or drift in the gyroscope, leading to less reliance on the model.
-\\\\
-The \textbf{measurement noise} parameter, \( R_{\text{measure}} \), governs the trust in the accelerometer. A lower \( R_{\text{measure}} \) suggests higher confidence in the accelerometer’s readings, while higher values reflect more measurement noise. 
-\\\\
-By adjusting these parameters, the Kalman filter balances between the model’s predictions and the sensor measurements to provide an optimal estimate of the airacraft's state.
-
-\subsubsection{Update Step}
-In the update step, the Kalman filter corrects the predicted state using the new measurements provided by the sensors, in this case, the accelerometer and gyroscope. The goal of this step is to incorporate the new measurement into the state estimate and reduce the uncertainty in the system. \\
-
-First, the \textit{residual error} is calculated as the difference between the actual sensor measurement ($z_k$), which comes from the accelerometer, and the predicted state ($\hat{z}_k$), which comes from the previous predict step. This residual error reflects the difference between the predicted model state and the sensor data: \[r_k = z_k - \hat{z}_k\]
-
-In the code, this is represented as:
-\begin{lstlisting}
-    float y = newAngle - angle;
-\end{lstlisting}
-
-Next, the \textit{Kalman gain} is computed, which determines how much of the new measurement should be used to adjust the predicted state. The Kalman gain considers both the sensor noise covariance ($R_{\text{measure}}$) and the state uncertainty covariance ($P_k$):
-\[K_k = \bar{P}_k H^T \bar{S}_k^{-1}\]
-where $S_k = H P_{k|k-1} H^T + R_{\text{measure}}$ is the innovation covariance and is used to normalize the residual error and compute the Kalman gain.
-
-In the code, the Kalman gain is calculated as:
-\begin{lstlisting}
-    // Innovation covariance represented by S, measurement noise covariance represented by R_measure
+#include "FastIMU.h"
+#include <Wire.h>
+#include <Servo.h>
+
+MPU6500 mpu;  // Define mpu object from class MPU6500
+AccelData accelOut;
+GyroData gyroOut;
+calData cal = {0};  // Calibration data
+
+float pitch = 0.0, roll = 0.0, yaw = 0.0;  // Euler angles
+const float alpha = 0.97;  // Complementary filter coefficient (between 0 and 1)
+unsigned long prevTime = 0;
+
+// Servo objects for plane control
+Servo aileronLeft;
+Servo aileronRight;
+Servo elevatorLeft;
+Servo elevatorRight;
+
+// Servo pins
+int aileronLeftPin = 9;
+int aileronRightPin = 10;
+int elevatorLeftPin = 5;
+int elevatorRightPin = 6;
+
+int prevAileronLeftAngle = 90;
+int prevAileronRightAngle = 90;
+int prevElevatorLeftAngle = 90;
+int prevElevatorRightAngle = 90;
+class Kalman {
+public:
+  float Q_angle;   // Process noise variance for the accelerometer
+  float Q_bias;    // Process noise variance for the gyroscope bias
+  float R_measure; // Measurement noise variance
+
+  float angle;     // The angle calculated by the Kalman filter
+  float bias;      // The gyro bias calculated by the Kalman filter
+  float rate;      // Unbiased rate calculated by subtracting bias from gyro rate
+
+  float P[2][2];   // Error covariance matrix
+
+  Kalman() {
+    Q_angle = 0.0025f; // 0.003f
+    Q_bias = 0.003f; // 0.003f
+    R_measure = 0.03f; // base value was 0.03f
+
+    angle = 0.0f;
+    bias = 0.0f;
+    rate = 0.0f;
+
+    P[0][0] = 0.0f;
+    P[0][1] = 0.0f;
+    P[1][0] = 0.0f;
+    P[1][1] = 0.0f;
+  }
+
+  float getAngle(float newAngle, float newRate, float dt) {
+    // Predict
+    rate = newRate - bias; // new Angular velocity - bias
+    angle += dt * rate;    // add the new angle to the previous angle
+
+    P[0][0] += dt * (dt * P[1][1] - P[0][1] - P[1][0] + Q_angle);
+    P[0][1] -= dt * P[1][1];
+    P[1][0] -= dt * P[1][1];
+    P[1][1] += Q_bias * dt;
+
+    // Update
     float S = P[0][0] + R_measure;
-    
-    // Kalman gain for updating angle, controls how much the new angle measurement will influence the updated angle estimate.
+    float K[2];
     K[0] = P[0][0] / S;
-    
-    // Kalman gain for updating bias, controls how much the new measurement will influence the updated bias estimate.
     K[1] = P[1][0] / S;
-\end{lstlisting}
 
-The covariance matrix P is updated to reflect the reduced uncertainty after incorporating the new measurement:
-\begin{lstlisting}
+    float y = newAngle - angle;
+    angle += K[0] * y;
+    bias += K[1] * y;
+
     float P00_temp = P[0][0];
     float P01_temp = P[0][1];
+
     P[0][0] -= K[0] * P00_temp;
     P[0][1] -= K[0] * P01_temp;
     P[1][0] -= K[1] * P00_temp;
     P[1][1] -= K[1] * P01_temp;
-\end{lstlisting}
 
-\subsubsection{Correction Step}
-In the update step, the Kalman filter corrects the predicted state using the new measurements provided by the IMU. The correction step is part of the update process, where the objective of this step is to incorporate the new measurement into the state estimate and reduce the uncertainty in the system. 
+    return angle;
+  }
+};
+void plotFilteredVsAccel(float filteredPitch, float accelPitch) {
+    // Send the filtered pitch and raw accelerometer pitch values separated by tabs
+    Serial.print(filteredPitch);
+    Serial.print("\t");
+    Serial.println(accelPitch);  // End the line with a newline character
+}
+void plotPitchRoll(float pitchT, float rollT) {
+    // Send the pitch and roll values separated by a tab
+    Serial.print(pitchT);
+    Serial.print("\t");  // Use tab to separate values
+    Serial.println(rollT);  // Use newline to mark the end of the data
+}
+void transmitToMatLab(float pitchT, float rollT) {
+    // Start header: send '111'
+    Serial.print("111");
 
-The corrected state is given by:
-\[\hat{x}_k = \hat{x}_{k|k-1} + K_k r_k\]
-Where:
-\begin{itemize}
-    \item \( \hat{x}_k \) is the corrected state estimate (angle and bias).
-    \item \( \hat{x}_{k|k-1} \) is the predicted state from the previous predict step.
-    \item \( K_k \) is the Kalman gain.
-    \item \( r_k \) is the residual error.
-\end{itemize}
+    // Transmit the IMU data as comma-separated values
+    Serial.print(accelOut.accelX, 2);  // X acceleration with 2 decimal places
+    Serial.print(",");
+    Serial.print(accelOut.accelY, 2);  // Y acceleration with 2 decimal places
+    Serial.print(",");
+    Serial.print(accelOut.accelZ, 2);  // Z acceleration with 2 decimal places
+    Serial.print(",");
+    Serial.print(gyroOut.gyroX, 2);  // X gyroscope data
+    Serial.print(",");
+    Serial.print(gyroOut.gyroY, 2);  // Y gyroscope data
+    Serial.print(",");
+    Serial.print(gyroOut.gyroZ, 2);  // Z gyroscope data
+    Serial.print(",");
+    Serial.print(pitchT, 2);  // Z gyroscope data
+    Serial.print(",");
+    Serial.print(rollT, 2);  // Z gyroscope data
+    Serial.print(",");
 
-Once the Kalman gain is computed, the predicted angle and bias are updated using the residual error and the Kalman gain. In the code, the correction step is represented by the following lines:
-\begin{lstlisting}
-    angle += K[0] * y;
-    bias += K[1] * y;
-\end{lstlisting}
+    // End header: send 'FFF'
+    Serial.print("FFF");
+}
 
+void setup() {
+  cal.valid = false;  // Mark calibration as invalid initially
+  Serial.begin(9600);
+  Wire.begin();
+  Wire.setClock(400000);  // Set the I2C clock to 400 kHz
+  delay(2000);
 
+  // Initialize MPU6500 with the specified address
+  int err = mpu.init(cal, 0x68);
+  if (err != 0) {
+    while (true) {
+      ;  // Stop execution if initialization fails
+    }
+  } else {
+    // "MPU6500 Initialized"
+  }
 
+  // Perform calibration
+  mpu.calibrateAccelGyro(&cal);
 
+  // Reinitialize with the new calibration data
+  mpu.init(cal, 0x68);
 
+  // Attach servos to pins
+  aileronLeft.attach(aileronLeftPin);
+  aileronRight.attach(aileronRightPin);
+  elevatorLeft.attach(elevatorLeftPin);
+  elevatorRight.attach(elevatorRightPin);
+}
 
+void transmitToPythonSimulationApp() {
+  // Serial communication routine
+  if (Serial.available()) {
+    char rx_char = Serial.read();
+    if (rx_char == '.') {
+      Serial.print(roll, 2);
+      Serial.print(", ");
+      Serial.print(pitch, 2);
+      Serial.print(", ");
+      Serial.println(yaw, 2); // Transmit yaw if needed
+    }
+  }
+}
 
-\chapter{Testing and Results}
-\section{Overview}
-Latency, which is the time delay between when the IMU sends sensor data to the Arduino Leonardo and when the Arduino processes this data and commands the servo motors (left and right ailerons and elevators) to act on it, directly impacts how quickly and accurately the system can respond to changes in orientation or external disturbances. If the latency is too high, the drone may become sluggish, react too slowly to disturbances (e.g., wind gusts), or fail to stabilize in time during fast maneuvers. Conversely, low and consistent latency allows for real-time feedback and quick, precise adjustments, resulting in stable and responsive flight.
+void servoControl(float pit, float rol) {
+  // Convert the float parameters to int
+  int pitchInt = static_cast<int>(pit);
+  int rollInt = static_cast<int>(rol);
 
-Testing for latency provides key insights into the system's performance by:
+  // Calculate new servo angles
+  int aileronLeftAngle = constrain(90 - rollInt - 30, 10, 170);
+  int aileronRightAngle = constrain(90 - rollInt - 30, 10, 170);
+  int elevatorLeftAngle = constrain(90 + pitchInt + 15, 10, 170);
+  int elevatorRightAngle = constrain(90 - pitchInt + 15, 10, 170);
 
-\begin{itemize} \item Ensuring the control loop, from the IMU input to the servo output via the Arduino Leonardo, operates within an acceptable time frame for real-time stabilization. \item Identifying any delays caused by processing within the Arduino, communication between the IMU and Arduino, or hardware limitations in the servo motors. \item Highlighting areas for optimization, such as reducing computational load on the Arduino or improving communication protocols between components. \end{itemize}
+  // Check for changes beyond 5 degrees for each servo
+  if (abs(aileronLeftAngle - prevAileronLeftAngle) >= 1) {
+    aileronLeft.write(aileronLeftAngle);
+    prevAileronLeftAngle = aileronLeftAngle;  // Update previous angle
+  }
 
+  if (abs(aileronRightAngle - prevAileronRightAngle) >= 1) {
+    aileronRight.write(aileronRightAngle);
+    prevAileronRightAngle = aileronRightAngle;  // Update previous angle
+  }
 
- \section{Testing Setup}
- To test the latency of the drone’s control system, particularly the delay between the IMU sensor (MPU6500) inputs and the servo motor outputs, a controlled setup was created. The drone prototype was kept at rest on a stable surface to isolate any movement-related variables, ensuring that the latency measurements strictly reflected the system’s response time. The IMU was programmed to continuously output acceleration and angular velocity data to a microcontroller (Arduino), where processing and filtering of the data occurred. This data was then used to calculate the appropriate control signals for the servos, which adjusted based on the sensor readings.
+  if (abs(elevatorLeftAngle - prevElevatorLeftAngle) >= 1) {
+    elevatorLeft.write(elevatorLeftAngle);
+    prevElevatorLeftAngle = elevatorLeftAngle;  // Update previous angle
+  }
 
-\section{Test Results}
-
-\begin{figure}[htbp]
-    \centering
-    \begin{minipage}{0.45\textwidth}
-        \centering
-        \includegraphics[width=\linewidth]{Distribution.png}
-        \caption{Histogram}
-        \label{fig:distribution}
-    \end{minipage}
-    \hfill
-    \begin{minipage}{0.45\textwidth}
-        \centering
-        \includegraphics[width=\linewidth]{Boxplot.png}
-        \caption{Boxplot Diagram}
-        \label{fig:boxplot}
-    \end{minipage}
-\end{figure}
-
-The latency readings were analyzed to assess the responsiveness of the system in the context of a drone with self-stabilization using an IMU MPU6500. The average latency was recorded at \textbf{1.53 ms}, with a maximum latency of \textbf{2.1 ms} and a minimum of \textbf{1.3 ms}. This indicates that, under typical conditions, the system is able to respond to IMU sensor inputs and adjust the servos within an acceptable time frame for real-time stabilization tasks. The \textbf{standard deviation} of the latency values was \textbf{\~200 µs}, suggesting that the system provides relatively consistent performance with minor variations in response time.
-
-These latency values imply that the system should perform well for standard drone operations, such as hovering, gentle turns, and altitude hold, where reaction times below 2 ms are generally sufficient for maintaining stability. However, during more aggressive flight maneuvers or in high-speed conditions, the maximum latency of \textbf{2.1 ms} could result in slightly delayed servo responses, potentially causing minor deviations in stabilization. Overall, the consistency in the latency measurements, with low jitter, ensures that the system will provide predictable and reliable control in most scenarios, making it suitable for practical drone applications. Further optimization of communication protocols and processing algorithms could enhance performance, particularly in challenging flight environments.
-
- In summary, latency testing is essential for verifying that the system's reaction times are fast enough to maintain stability and performance, especially in dynamic and fast-changing environments where timely control inputs are critical.
-
-\chapter{Conclusion}
-\section{Project Summary}
-     By continuously tracking the aircraft's orientation and movements, the IMU enabled real-time stabilization adjustments. When deviations in roll or pitch were detected, a control system—integrating a Kalman filter for noise reduction and a Proportional controller for precise correction adjusted the servo motors to tilt the elevator and ailerons. 
-
-\section{Challenges}
-\begin{itemize}
-    \item The lack of a magnetometer in the MPU-6500 IMU limited accurate yaw measurement and made full 3D orientation tracking more challenging, as it lacked a fixed reference for horizontal orientation.
-    \item The absence of a feedback loop prevented dynamic adjustment of Kalman filter weights, limiting adaptability, while the fixed target orientation reduced responsiveness to environmental changes.
-\end{itemize}
-
-\section{Future Improvements}
-\begin{figure}[htbp]
-    \centering
-    \hspace*{-2cm}
-    \begin{tikzpicture}[node distance=0.5cm, auto]
-        % Define block styles
-        \tikzstyle{block} = [draw, fill=teal!70, rectangle, minimum height=2em, minimum width=3em, text centered, font=\small\bfseries]
-        \tikzstyle{sum} = [draw, fill=teal!70, circle, node distance=1cm, minimum size=1.2cm] % Adjusted size for larger X
-        \tikzstyle{line} = [draw, -{Stealth[scale=1.2]}]
-        
-        
-
-        % Nodes
-        \node[sum] (sum) {};  % Summation node with no text
-        % Draw "X" lines inside the summation node to create a large X without arrowheads
-
-        \draw (sum.south west) -- (sum.north east);
-        \draw (sum.north west) -- (sum.south east);
-        
-
-        \node[block, right=of sum] (imu) {IMU};
-        \node[block, right=of imu,minimum width=2cm, minimum height=2cm, align=center] (kalman) {Kalman\\filter};
-        \node[block, right=of kalman,minimum width=2cm, minimum height=2cm, align=center] (pid) {PID\\ Controller};
-        \node[block, right=of pid, minimum width=2cm, minimum height=2cm, align=center] (servo) {Servo motors \\ (flaps \& ailerons)};
-        
-        % Connections
-        \draw[line] (sum) -- node[above] {} (imu);
-        \draw[line] (imu) -- (kalman);
-        \draw[line] (kalman) -- (pid);
-        \draw[line] (pid) -- (servo);
-        \draw[line] (servo.east) -- ++(0.5,0) |- ++(0,-1.5) -| (sum.south);
-        
-        % Labels
-        \node[left=0.2cm of sum, yshift=0.34cm] (ref_input) {Reference input};
-        
-        \draw[-] (ref_input.south) -- (-1.5,0) coordinate (endPoint);  
-        \draw[->] (endPoint) -- (sum.west);  
-        
-        \node[above right=-0.1cm and -1.3cm of sum] {+};
-        \node[below right=-0.1cm and -1.3cm of sum] {-};
-        \node[right=0.2cm of servo, yshift=0.5cm] (output) {Output orientation};
-        
-       \draw[-] (servo.east) -- ++(2,0) coordinate (endLine);  % Draws the initial horizontal line and stores the endpoint in (endLine)
-       \draw[->] (endLine) -- ++(0.3,0);
-    \end{tikzpicture}
-    \caption{Closed-loop control system with PID implementation}
-    \label{fig:control_system}
-\end{figure}
-
-\begin{itemize}    
-    \item \textbf{Add Integral and Derivative Components}: Extend the current proportional-only control by adding Integral and Derivative components to optimize PID gains in real time for varied flight conditions.
-    \item \textbf{Establish a Real-Time Feedback Loop with Dynamic Kalman Filtering}: Create a continuous feedback loop with dynamically adjusted Kalman filter weights to enhance noise reduction and enable responsive, real-time orientation correction.
-    
-    \item \textbf{Incorporate Magnetometer for Enhanced Accuracy}: Integrate additional sensors, such as magnetometers, alongside the IMU to improve orientation accuracy and compensate for yaw drift over time.
-\end{itemize}    
-\appendix
-\chapter{Appendix}
-\section{References}
-\section{Figures}
-    \begin{figure}[htbp]
-        \centering
-        \includegraphics[width=0.5\textwidth]{MiniProject2Simulation_1.PNG}
-        \caption{MATLAB's Flight Simulation environment for prototype aircraft}
-        \label{fig:your_label}
-    \end{figure}
-\begin{landscape}
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=1\linewidth]{SystemUnderRest.PNG}
-    \caption{\centering Comparison of sensor data from IMU under rest conditions; highlighting noise in the accelerometer and drift in the gyroscope readings over time
-    \\Blue line – Accelerometer readings 
-    \\Orange line– Gyroscope readings
-    \\Green line–Kalman Filter}
-    \label{fig:system under rest}
-\end{figure}
-\end{landscape}
-\newpage
-
-\begin{landscape}
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=1\linewidth]{SystemInConstantMotion.PNG}
-    \caption{\centering IMU data for a system in constant motion, showing gyroscope drift and periods of stability in accelerometer readings with residual noise
-    \\ \textbf{Blue line} – Accelerometer readings
-    \\ \textbf{Orange line} – Gyroscope readings
-    \\ \textbf{Green line} – Kalman Filter}
-    \label{fig:system_in_motion}
-\end{figure}
-\end{landscape}
+  if (abs(elevatorRightAngle - prevElevatorRightAngle) >= 1) {
+    elevatorRight.write(elevatorRightAngle);
+    prevElevatorRightAngle = elevatorRightAngle;  // Update previous angle
+  }
+}
 
 
-\section{The Main Code}
+Kalman kalmanPitch;
+Kalman kalmanRoll;
 
-\end{document}
+void loop() {
+  mpu.update();
+  mpu.getAccel(&accelOut);
+  mpu.getGyro(&gyroOut);
+
+  // Calculate time difference
+  unsigned long currentTime = millis();
+  float dt = (currentTime - prevTime) / 1000.0;  // Convert to seconds
+  prevTime = currentTime;
+
+  // Calculate pitch and roll from accelerometer data
+  float accelPitch = atan2(accelOut.accelY, sqrt(accelOut.accelX * accelOut.accelX + accelOut.accelZ * accelOut.accelZ)) * 180.0 / PI;
+  float accelRoll = atan2(-accelOut.accelX, sqrt(accelOut.accelY * accelOut.accelY + accelOut.accelZ * accelOut.accelZ)) * 180.0 / PI;
+
+  // Use the Kalman filter to estimate pitch and roll angles
+  pitch = kalmanPitch.getAngle(accelPitch, gyroOut.gyroX, dt);
+  roll = kalmanRoll.getAngle(accelRoll, gyroOut.gyroY, dt);
+
+  // Control servos based on pitch and roll
+  servoControl(pitch, roll);
+  transmitToPythonSimulationApp();
+  transmitToMatLab(pitch, roll);
+  delay(40);  // Add some delay for stability
+}
+
